@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:life_mon/widget/calorie_bar.dart';
 
-class HomeScreen extends StatefulWidget{
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -8,9 +9,14 @@ class HomeScreen extends StatefulWidget{
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;  // ① 選択中インデックスを保持
+  int _selectedIndex = 1; // Homeを初期タブに
 
   void _onItemTapped(int index) {
+    if (index == 2) {
+      Navigator.pushNamed(context, '/food'); // Food画面へ遷移
+      return;
+    }
+
     setState(() {
       _selectedIndex = index;
     });
@@ -22,8 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            CalorieBar()
+          children: const [
+            CalorieBar(), // カロリーバーを表示
           ],
         ),
       ),
@@ -31,51 +37,17 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.blue,
-        enableFeedback: true,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.brown,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Analyze',
+            label: 'analyze',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.rice_bowl),
-            label: 'food',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
+          BottomNavigationBarItem(icon: Icon(Icons.rice_bowl), label: 'food'),
         ],
       ),
-    );
-  }
-}
-
-class CalorieBar extends StatelessWidget {
-  const CalorieBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.grey,
-          ),
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width - 100,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.green,
-          ),
-        ),
-      ],
     );
   }
 }
