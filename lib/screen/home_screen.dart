@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:life_mon/widget/calorie_bar.dart';
 
-class HomeScreen extends StatefulWidget{
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -8,38 +9,30 @@ class HomeScreen extends StatefulWidget{
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 1; // Homeを初期タブに
+
+  void _onItemTapped(int index) {
+    if (index == 2) {
+      Navigator.pushNamed(context, '/food'); // Food画面へ遷移
+      return;
+    }
+
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
-    );
-  }
-}
-
-class CalorieBar extends StatelessWidget {
-  const CalorieBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.grey,
-          ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: const [
+            CalorieBar(), // カロリーバーを表示
+          ],
         ),
-        Container(
-          width: MediaQuery.of(context).size.width - 100,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.green,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
