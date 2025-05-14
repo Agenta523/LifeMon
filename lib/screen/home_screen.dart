@@ -9,19 +9,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 1; // Homeを初期タブに
-
-  void _onItemTapped(int index) {
-    if (index == 2) {
-      Navigator.pushNamed(context, '/food'); // Food画面へ遷移
-      return;
-    }
-
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
