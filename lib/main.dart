@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'screen/home_screen.dart';
-import 'screen/analyze_screen.dart';
-import 'screen/food_screen.dart';
+import 'screen/home_screen/home_screen.dart';
+import 'screen/analyze_screen/analyze_screen.dart';
+import 'screen/food_screen/food_screen.dart';
+import 'screen/food_screen/maindish_reg.dart'; // 主菜画面をインポート
 import 'widget/bottom_navigation.dart';
 
 void main() => runApp(const MyApp());
@@ -13,7 +14,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Route Navigation App',
-      home: const MainScreen(),
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const MainScreen(),
+        '/maindish': (context) => const MainDishScreen(), // 主菜画面ルート
+      },
     );
   }
 }
@@ -26,12 +32,12 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1;//最初のインデックスはhome
+  int _currentIndex = 1; // 最初のインデックスはhome
 
   final List<Widget> _screens = [
-    AnalyzeScreen(),
-    HomeScreen(),
-    FoodScreen(),
+    const AnalyzeScreen(),
+    const HomeScreen(),
+    const FoodScreen(),
   ];
 
   void _onItemTapped(int index) {
