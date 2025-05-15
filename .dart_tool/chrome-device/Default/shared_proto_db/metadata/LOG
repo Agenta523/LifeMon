@@ -1,6 +1,2 @@
-<<<<<<< HEAD
-=======
-2025/05/15-10:11:26.812 15f8 Reusing MANIFEST C:\Users\shin7\AppData\Local\Temp\flutter_tools.7cb0cf37\flutter_tools_chrome_device.997ede82\Default\shared_proto_db\metadata/MANIFEST-000001
-2025/05/15-10:11:26.813 15f8 Recovering log #3
-2025/05/15-10:11:26.813 15f8 Reusing old log C:\Users\shin7\AppData\Local\Temp\flutter_tools.7cb0cf37\flutter_tools_chrome_device.997ede82\Default\shared_proto_db\metadata/000003.log 
->>>>>>> Taira
+2025/05/15-11:12:07.841 4984 Creating DB C:\Users\shin7\AppData\Local\Temp\flutter_tools.3f58ff8b\flutter_tools_chrome_device.fa9d7fd\Default\shared_proto_db\metadata since it was missing.
+2025/05/15-11:12:07.897 4984 Reusing MANIFEST C:\Users\shin7\AppData\Local\Temp\flutter_tools.3f58ff8b\flutter_tools_chrome_device.fa9d7fd\Default\shared_proto_db\metadata/MANIFEST-000001

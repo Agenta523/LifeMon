@@ -1,12 +1,2 @@
-<<<<<<< HEAD
-2025/05/15-09:14:01.176 67f8 Reusing MANIFEST C:\Users\shin7\AppData\Local\Temp\flutter_tools.4921bb29\flutter_tools_chrome_device.1cd14a3a\Default\Site Characteristics Database/MANIFEST-000001
-2025/05/15-09:14:01.177 67f8 Recovering log #6
-2025/05/15-09:14:01.177 67f8 Reusing old log C:\Users\shin7\AppData\Local\Temp\flutter_tools.4921bb29\flutter_tools_chrome_device.1cd14a3a\Default\Site Characteristics Database/000006.log 
-2025/05/15-09:14:01.178 67f8 Delete type=0 #3
-2025/05/15-09:14:01.178 67f8 Delete type=2 #4
-2025/05/15-09:14:01.178 67f8 Delete type=2 #6
-=======
-2025/05/15-10:11:26.695 75e8 Reusing MANIFEST C:\Users\shin7\AppData\Local\Temp\flutter_tools.7cb0cf37\flutter_tools_chrome_device.997ede82\Default\Site Characteristics Database/MANIFEST-000001
-2025/05/15-10:11:26.696 75e8 Recovering log #3
-2025/05/15-10:11:26.696 75e8 Reusing old log C:\Users\shin7\AppData\Local\Temp\flutter_tools.7cb0cf37\flutter_tools_chrome_device.997ede82\Default\Site Characteristics Database/000003.log 
->>>>>>> Taira
+2025/05/15-11:12:07.712 5e58 Creating DB C:\Users\shin7\AppData\Local\Temp\flutter_tools.3f58ff8b\flutter_tools_chrome_device.fa9d7fd\Default\Site Characteristics Database since it was missing.
+2025/05/15-11:12:07.720 5e58 Reusing MANIFEST C:\Users\shin7\AppData\Local\Temp\flutter_tools.3f58ff8b\flutter_tools_chrome_device.fa9d7fd\Default\Site Characteristics Database/MANIFEST-000001

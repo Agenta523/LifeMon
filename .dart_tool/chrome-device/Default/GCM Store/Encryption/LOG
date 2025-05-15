@@ -1,6 +1,2 @@
-<<<<<<< HEAD
-=======
-2025/05/15-10:11:33.966 7b5c Reusing MANIFEST C:\Users\shin7\AppData\Local\Temp\flutter_tools.7cb0cf37\flutter_tools_chrome_device.997ede82\Default\GCM Store\Encryption/MANIFEST-000001
-2025/05/15-10:11:33.967 7b5c Recovering log #3
-2025/05/15-10:11:33.968 7b5c Reusing old log C:\Users\shin7\AppData\Local\Temp\flutter_tools.7cb0cf37\flutter_tools_chrome_device.997ede82\Default\GCM Store\Encryption/000003.log 
->>>>>>> Taira
+2025/05/15-11:12:10.169 75a4 Creating DB C:\Users\shin7\AppData\Local\Temp\flutter_tools.3f58ff8b\flutter_tools_chrome_device.fa9d7fd\Default\GCM Store\Encryption since it was missing.
+2025/05/15-11:12:10.175 75a4 Reusing MANIFEST C:\Users\shin7\AppData\Local\Temp\flutter_tools.3f58ff8b\flutter_tools_chrome_device.fa9d7fd\Default\GCM Store\Encryption/MANIFEST-000001
