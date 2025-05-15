@@ -170,7 +170,11 @@
       "languageVersion": "3.7"
     }
   ],
+<<<<<<< HEAD
   "generated": "2025-05-15T00:12:11.377614Z",
+=======
+  "generated": "2025-05-15T00:29:51.413556Z",
+>>>>>>> Taira
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///C:/Program%20Files/flutter",
