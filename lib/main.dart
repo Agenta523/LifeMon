@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'screen/home_screen/home_screen.dart';
-import 'screen/analyze_screen/analyze_screen.dart';
-import 'screen/food_screen/food_screen.dart';
-import 'screen/food_screen/maindish_reg.dart'; // 主菜画面をインポート
-import 'screen/food_screen/sidedish_reg.dart';
-import 'screen/food_screen/vegetable_reg.dart';
-import 'screen/food_screen/other_reg.dart';
-import 'screen/food_screen/soup_reg.dart';
-import 'widget/bottom_navigation.dart';
+import 'presentation/screen/home_screen/home_screen.dart';
+import 'presentation/screen/analyze_screen/analyze_screen.dart';
+import 'presentation/screen/food_screen/food_screen.dart';
+import 'presentation/screen/food_screen/maindish_reg.dart'; // 主菜画面をインポート
+import 'presentation/screen/food_screen/sidedish_reg.dart';
+import 'presentation/screen/food_screen/vegetable_reg.dart';
+import 'presentation/screen/food_screen/other_reg.dart';
+import 'presentation/screen/food_screen/soup_reg.dart';
+import 'presentation/widget/bottom_navigation.dart';
 
 void main() => runApp(const MyApp());
 
