@@ -16,13 +16,13 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   Color getLineColor(int index) {
     switch (index) {
       case 0:
-        return const Color(0xffFF6A00);
+        return const Color.fromARGB(255, 255, 122, 27);
       case 1:
-        return const Color(0xffFF7B86);
+        return const Color.fromARGB(255, 255, 123, 134);
       case 2:
-        return const Color(0xffFFBB00);
+        return const Color.fromARGB(255, 255, 187, 0);
       case 3:
-        return const Color(0xff7B86FF); 
+        return const Color.fromARGB(255, 123, 134, 255); 
       default:
         return Colors.blue;
     }
@@ -54,11 +54,13 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     double? maxY = lineData.isNotEmpty ? lineData.map((spot) => spot.y).reduce((a, b) => a > b ? a : b)
     : 0;
     if(index == 0){
-      return maxY+300;
+      return maxY + 500 + (3 - (maxY % 3 == 0 ? 3 : maxY % 3));
     }else{
-      return maxY+30;
+      return maxY+ (3 - (maxY % 3 == 0 ? 3 : maxY % 3));
     }
   }
+  List<IconData> icons =[Icons.local_fire_department, Icons.fitness_center, Icons.bolt, Icons.school];
+  List<String> labels = ["カロリー", "タンパク質", "脂質", "炭水化物"];
 
   @override
   Widget build(BuildContext context) {
@@ -113,18 +115,20 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
             left: 0,
             right: 0,
             child: NutrientSelector(
-              labels: ['Cal', 'P', 'F', 'C'],
+              icons: icons,
+              labels: labels,
               selectedIndex: selectedIndex,
               onSelected: (index) {
                 setState(() {
                   selectedIndex = index;
                 });
               },
+              buttonColor: lineColor,
             ),
           ),
           Positioned(
             top: ellipseTop + 80,
-            left: 0,
+            left: -40,
             right: 0,
             child: Center(
               child: FLChartData(

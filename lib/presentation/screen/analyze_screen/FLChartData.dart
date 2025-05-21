@@ -36,7 +36,7 @@ class FLChartData extends StatelessWidget {
               dotData: FlDotData(
                 show: true,
                 getDotPainter: (spot, percent, barData, index) =>
-                    FlDotCirclePainter(
+                FlDotCirclePainter(
                   radius: 3.0,
                   color: lineColor,
                   strokeWidth: 2.0,
@@ -60,7 +60,13 @@ class FLChartData extends StatelessWidget {
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
             bottomTitles: AxisTitles(
-              axisNameWidget: const Text("曜日", style: TextStyle(color: Color(0xffCDCDCD))),
+              axisNameWidget: Padding(
+                padding: const EdgeInsets.only(left: 60),
+                child:Align(
+                  alignment: Alignment.center,
+                  child: const Text("曜日", style: TextStyle(color: Color(0xffCDCDCD))),
+                ) 
+              ) ,          
               axisNameSize: 22.0,
               sideTitles: SideTitles(
                 showTitles: true,
@@ -71,10 +77,13 @@ class FLChartData extends StatelessWidget {
             ),
             leftTitles: AxisTitles(
               axisNameSize: 22.0, 
-              axisNameWidget: Text(
-                unit, 
-                style: TextStyle(color: Color(0xffCDCDCD))
-              ),
+              axisNameWidget:Padding(
+                padding: const EdgeInsets.only(left: 60),
+                child:Align(
+                  alignment: Alignment.center,
+                  child: Text(unit, style: TextStyle(color: Color(0xffCDCDCD))),
+                ),
+              ),               
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 40.0,
@@ -95,17 +104,23 @@ class FLChartData extends StatelessWidget {
       fontWeight: FontWeight.bold,
       fontSize: 16.0,
     );
-
+    
     final labels = ['月', '火', '水', '木', '金', '土', '日'];
+    int todayIndex = DateTime.now().weekday - 1;
 
-    Widget text = Text(
-      value.toInt() < labels.length ? labels[value.toInt()] : '',
-      style: style,
-    );
+    List<String> reorderedLabels = [
+      for (int i = 1; i <= 7; i++) labels[(todayIndex + i) % 7]
+    ];
+
+    String label = '';
+    int index = value.toInt();
+    if (index >= 0 && index < reorderedLabels.length) {
+      label = reorderedLabels[index];
+    }
 
     return SideTitleWidget(
       axisSide: meta.axisSide,
-      child: text,
+      child: Text(label, style: style),
     );
   }
 }
