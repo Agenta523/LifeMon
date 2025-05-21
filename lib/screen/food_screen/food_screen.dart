@@ -6,7 +6,7 @@ class FoodScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFA8DAB5),
+      color: const Color(0xFFA8DAB5), // 背景色
       child: Center(
         child: Container(
           margin: const EdgeInsets.all(20),
@@ -18,7 +18,6 @@ class FoodScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // タイトル
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
@@ -37,7 +36,6 @@ class FoodScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-
               const Text(
                 'ここでは今日のあなたの食事を登録できます。\nあなたの食事がモンスターの餌になります！',
                 textAlign: TextAlign.center,
@@ -45,59 +43,37 @@ class FoodScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 食事カテゴリーアイコン群
+              // カテゴリごとのアイコン表示
               Wrap(
                 spacing: 20,
                 runSpacing: 20,
                 alignment: WrapAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/maindish');
-                    },
-                    child: Column(
-                      children: const [
-                        Icon(
-                          Icons.set_meal,
-                          size: 50,
-                          color: Color(0xFF9C6520),
-                        ),
-                        Text("主菜", style: TextStyle(color: Color(0xFF9C6520))),
-                      ],
-                    ),
+                  _buildFoodCategory(
+                    context,
+                    Icons.set_meal,
+                    "主菜",
+                    '/maindish',
                   ),
-                  Column(
-                    children: const [
-                      Icon(Icons.set_meal, size: 50, color: Color(0xFF9C6520)),
-                      Text("魚", style: TextStyle(color: Color(0xFF9C6520))),
-                    ],
+                  _buildFoodCategory(
+                    context,
+                    Icons.rice_bowl,
+                    "副菜",
+                    '/sidedish',
                   ),
-                  Column(
-                    children: const [
-                      Icon(
-                        Icons.ramen_dining,
-                        size: 50,
-                        color: Color(0xFF9C6520),
-                      ),
-                      Text("麺", style: TextStyle(color: Color(0xFF9C6520))),
-                    ],
+                  _buildFoodCategory(
+                    context,
+                    Icons.soup_kitchen,
+                    "汁物",
+                    '/soup',
                   ),
-                  Column(
-                    children: const [
-                      Icon(Icons.rice_bowl, size: 50, color: Color(0xFF9C6520)),
-                      Text("ごはん", style: TextStyle(color: Color(0xFF9C6520))),
-                    ],
+                  _buildFoodCategory(
+                    context,
+                    Icons.soup_kitchen,
+                    "野菜",
+                    '/vegetable',
                   ),
-                  Column(
-                    children: const [
-                      Icon(
-                        Icons.local_florist,
-                        size: 40,
-                        color: Color(0xFF9C6520),
-                      ),
-                      Text("野菜", style: TextStyle(color: Color(0xFF9C6520))),
-                    ],
-                  ),
+                  _buildFoodCategory(context, Icons.fastfood, "その他", '/other'),
                 ],
               ),
             ],
@@ -106,4 +82,23 @@ class FoodScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+// 🔽 ここに定義します（FoodScreenの下）
+Widget _buildFoodCategory(
+  BuildContext context,
+  IconData icon,
+  String label,
+  String route,
+) {
+  return GestureDetector(
+    onTap: () => Navigator.pushNamed(context, route),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 50, color: const Color(0xFF9C6520)),
+        Text(label, style: const TextStyle(color: Color(0xFF9C6520))),
+      ],
+    ),
+  );
 }
