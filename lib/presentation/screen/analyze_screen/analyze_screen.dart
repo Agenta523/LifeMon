@@ -33,13 +33,30 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       case 0:
         return [FlSpot(0, 2500), FlSpot(1, 2300), FlSpot(2, 2400),FlSpot(3, 2500), FlSpot(4, 2300), FlSpot(5, 2400),FlSpot(6, 2400)];
       case 1:
-        return [FlSpot(0, 120), FlSpot(1, 130), FlSpot(2, 110),FlSpot(3, 2500), FlSpot(4, 2300), FlSpot(5, 2400),FlSpot(6, 2400)];
+        return [FlSpot(0, 120), FlSpot(1, 130), FlSpot(2, 110),FlSpot(3, 100), FlSpot(4, 100), FlSpot(5, 120),FlSpot(6, 130)];
       case 2:
-        return [FlSpot(0, 70), FlSpot(1, 80), FlSpot(2, 75),FlSpot(3, 2500), FlSpot(4, 2300), FlSpot(5, 2400),FlSpot(6, 2400)];
+        return [FlSpot(0, 70), FlSpot(1, 80), FlSpot(2, 75),FlSpot(3, 60), FlSpot(4, 45), FlSpot(5, 50),FlSpot(6, 40)];
       case 3:
-        return [FlSpot(0, 300), FlSpot(1, 280), FlSpot(2, 310),FlSpot(3, 2500), FlSpot(4, 2300), FlSpot(5, 2400),FlSpot(6, 2400)];
+        return [FlSpot(0, 200), FlSpot(1, 230), FlSpot(2, 310),FlSpot(3, 250), FlSpot(4, 230), FlSpot(5, 240),FlSpot(6, 240)];
       default:
         return [];
+    }
+  }
+
+  String getUnit(int index) {
+    if(index == 0){
+      return "kcal";
+    }else{
+      return "g";
+    }
+  }
+  double getMaxYvalue(int index, List<FlSpot> lineData){
+    double? maxY = lineData.isNotEmpty ? lineData.map((spot) => spot.y).reduce((a, b) => a > b ? a : b)
+    : 0;
+    if(index == 0){
+      return maxY+300;
+    }else{
+      return maxY+30;
     }
   }
 
@@ -54,10 +71,21 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
     final lineColor = getLineColor(selectedIndex);
     final lineData = getLineData(selectedIndex);
+    final unit = getUnit(selectedIndex);
+    final maxYvalue = getMaxYvalue(selectedIndex, lineData);
 
     return Scaffold(
       body: Stack(
         children: [
+          Container(
+            decoration: BoxDecoration(
+               gradient: LinearGradient(
+                colors: [Colors.white,lineColor],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+               )
+            ),
+          ),
           Positioned(
             left: ellipseLeft,
             top: ellipseTop,
@@ -102,6 +130,8 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               child: FLChartData(
                 lineColor: lineColor,
                 lineData: lineData,
+                unit: unit,
+                maxYValue: maxYvalue,
               ),
             ),
           ),
