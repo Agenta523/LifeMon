@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:life_mon/widget/calorie_bar.dart';
+import 'package:life_mon/presentation/widget/calorie_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
