@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:life_mon/widget/food_register_template.dart'; // ← 実際のプロジェクト名に置き換える
+import 'package:life_mon/presentation/widget/Food_Register_Template.dart'; // ← 実際のプロジェクト名に置き換える
 
 class SideDishScreen extends StatelessWidget {
   const SideDishScreen({Key? key}) : super(key: key);

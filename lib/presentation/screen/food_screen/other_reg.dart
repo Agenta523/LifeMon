@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:life_mon/widget/food_register_template.dart';
+import 'package:life_mon/presentation/widget/Food_Register_Template.dart';
 
 class OtherScreen extends StatelessWidget {
   const OtherScreen({Key? key}) : super(key: key);
