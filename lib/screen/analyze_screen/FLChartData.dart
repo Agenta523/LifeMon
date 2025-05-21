@@ -4,21 +4,25 @@ import 'package:fl_chart/fl_chart.dart';
 class FLChartData extends StatelessWidget {
   final Color lineColor;
   final List<FlSpot> lineData;
+  final String unit;
+  final double maxYValue;
 
   const FLChartData({
     super.key,
     required this.lineColor,
     required this.lineData,
+    required this.unit,
+    required this.maxYValue,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    const double maxYValue = 3000;
+    final scale = maxYValue / 3;
 
     return SizedBox(
-      width: screenWidth * 0.95,
+      width: screenWidth * 0.9,
       height: screenHeight * 0.4,
       child: LineChart(
         LineChartData(
@@ -45,7 +49,7 @@ class FLChartData extends StatelessWidget {
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
-            horizontalInterval: maxYValue / 3,
+            horizontalInterval: scale,
             getDrawingHorizontalLine: (value) {
               return FlLine(
                 color: const Color(0xffCDCDCD),
@@ -66,8 +70,16 @@ class FLChartData extends StatelessWidget {
               ),
             ),
             leftTitles: AxisTitles(
-              axisNameWidget: const Text("kcal", style: TextStyle(color: Color(0xffCDCDCD))),
-              sideTitles: SideTitles(showTitles: true, reservedSize: 40.0),
+              axisNameSize: 22.0, 
+              axisNameWidget: Text(
+                unit, 
+                style: TextStyle(color: Color(0xffCDCDCD))
+              ),
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 40.0,
+                interval: scale,
+              ),
             ),
             topTitles: AxisTitles(),
             rightTitles: AxisTitles(),
