@@ -54,7 +54,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     double? maxY = lineData.isNotEmpty ? lineData.map((spot) => spot.y).reduce((a, b) => a > b ? a : b)
     : 0;
     if(index == 0){
-      return maxY + 500 + (3 - (maxY % 3 == 0 ? 3 : maxY % 3));
+      return maxY + (3 - (maxY % 3 == 0 ? 3 : maxY % 3))*100;
     }else{
       return maxY+ (3 - (maxY % 3 == 0 ? 3 : maxY % 3));
     }
