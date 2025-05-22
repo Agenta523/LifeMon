@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class FoodScreen extends StatelessWidget {
   const FoodScreen({super.key});
@@ -60,26 +61,31 @@ class FoodScreen extends StatelessWidget {
                   children: [
                     _buildFoodButton(
                       context,
-                      Icons.set_meal,
+                      'lib/presentation/images/maindish.svg',
                       "主菜",
                       '/maindish',
                     ),
                     _buildFoodButton(
                       context,
-                      Icons.rice_bowl,
+                      'lib/presentation/images/sidedish.svg',
                       "副菜",
                       '/sidedish',
                     ),
                     _buildFoodButton(
                       context,
-                      Icons.soup_kitchen,
+                      'lib/presentation/images/soup.svg',
                       "汁物",
                       '/soup',
                     ),
-                    _buildFoodButton(context, Icons.eco, "野菜", '/vegetable'),
                     _buildFoodButton(
                       context,
-                      Icons.emoji_food_beverage,
+                      'lib/presentation/images/vegetable.svg',
+                      "野菜",
+                      '/vegetable',
+                    ),
+                    _buildFoodButton(
+                      context,
+                      'lib/presentation/images/other.svg',
                       "その他",
                       '/other',
                     ),
@@ -95,7 +101,7 @@ class FoodScreen extends StatelessWidget {
 
   Widget _buildFoodButton(
     BuildContext context,
-    IconData icon,
+    String imagePath,
     String label,
     String routeName,
   ) {
@@ -106,7 +112,7 @@ class FoodScreen extends StatelessWidget {
           CircleAvatar(
             radius: 36,
             backgroundColor: Colors.white,
-            child: Icon(icon, color: Color(0xFF9C6520), size: 32),
+            child: SvgPicture.asset(imagePath, width: 32, height: 32),
           ),
           const SizedBox(height: 8),
           Text(label, style: const TextStyle(color: Color(0xFF9C6520))),
