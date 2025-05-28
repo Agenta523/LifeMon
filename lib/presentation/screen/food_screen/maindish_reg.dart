@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:life_mon/presentation/widget/Food_Register_Template.dart';
+import '../../widget/food_register_template.dart';
 
 class MainDishScreen extends StatelessWidget {
   const MainDishScreen({Key? key}) : super(key: key);
@@ -7,9 +7,9 @@ class MainDishScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FoodRegisterTemplate(
-      title: 'その他を登録',
-      message: 'その他の食事を登録してください',
-      icon: Icons.fastfood,
+      title: '主菜を登録',
+      message: '主菜の内容を入力してください',
+      icon: Icons.restaurant,
     );
   }
 }

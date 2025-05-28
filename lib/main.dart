@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'presentation/screen/home_screen/home_screen.dart';
-import 'presentation/screen/analyze_screen/analyze_screen.dart';
-import 'presentation/screen/food_screen/food_screen.dart';
-import 'presentation/screen/food_screen/maindish_reg.dart'; // 主菜画面をインポート
-import 'presentation/screen/food_screen/sidedish_reg.dart';
-import 'presentation/screen/food_screen/vegetable_reg.dart';
-import 'presentation/screen/food_screen/other_reg.dart';
-import 'presentation/screen/food_screen/soup_reg.dart';
+import 'presentation/navigator/analyze_navigator.dart';
+import 'presentation/navigator/home_navigator.dart';
+import 'presentation/navigator/food_navigator.dart';
 import 'presentation/widget/bottom_navigation.dart';
 
 void main() => runApp(const MyApp());
@@ -17,17 +12,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Route Navigation App',
+      title: 'Nested Navigator App',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const MainScreen(),
-        '/maindish': (context) => const MainDishScreen(), // 主菜画面ルート
-        '/sidedish': (context) => const SideDishScreen(),
-        '/soup': (context) => const SoupScreen(),
-        '/other': (context) => const OtherScreen(),
-        '/vegetable': (context) => const VegetableScreen(),
-      },
+      home: const MainScreen(),
     );
   }
 }
@@ -40,27 +27,21 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1; // 最初のインデックスはhome
+  int _currentIndex = 1;
 
-  final List<Widget> _screens = [
-    const AnalyzeScreen(),
-    const HomeScreen(),
-    const FoodScreen(),
+  final List<Widget> _screens = const [
+    AnalyzeNavigator(),
+    HomeNavigator(),
+    FoodNavigator(),
   ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
-        onItemTapped: _onItemTapped,
+        onItemTapped: (index) => setState(() => _currentIndex = index),
       ),
     );
   }

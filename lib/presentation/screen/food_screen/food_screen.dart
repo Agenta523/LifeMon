@@ -69,25 +69,25 @@ class FoodScreen extends StatelessWidget {
                       context,
                       'lib/presentation/images/sidedish.svg',
                       "副菜",
-                      '/sidedish',
+                      '/catalog', // 副菜は図鑑画面に遷移させる例
                     ),
                     _buildFoodButton(
                       context,
                       'lib/presentation/images/soup.svg',
                       "汁物",
-                      '/soup',
+                      '/catalog',
                     ),
                     _buildFoodButton(
                       context,
                       'lib/presentation/images/vegetable.svg',
                       "野菜",
-                      '/vegetable',
+                      '/catalog',
                     ),
                     _buildFoodButton(
                       context,
                       'lib/presentation/images/other.svg',
                       "その他",
-                      '/other',
+                      '/catalog',
                     ),
                   ],
                 ),
@@ -106,7 +106,7 @@ class FoodScreen extends StatelessWidget {
     String routeName,
   ) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, routeName),
+      onTap: () => Navigator.of(context).pushNamed(routeName),
       child: Column(
         children: [
           CircleAvatar(
