@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dish_catalog_screen.dart';
 
 class FoodScreen extends StatelessWidget {
   const FoodScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController _energyController = TextEditingController();
+
     return Scaffold(
-      backgroundColor: const Color(0xFFA8DAB5), // 背景色（淡緑）
+      backgroundColor: const Color(0xFFA8DAB5),
       body: SafeArea(
         child: Center(
           child: Container(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF2D9), // メイン背景（ベージュ）
+              color: const Color(0xFFFFF2D9),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // タイトルバー
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
@@ -39,7 +41,6 @@ class FoodScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 説明文
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -53,7 +54,6 @@ class FoodScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // アイコンボタン群
                 Wrap(
                   alignment: WrapAlignment.center,
                   spacing: 20,
@@ -63,32 +63,74 @@ class FoodScreen extends StatelessWidget {
                       context,
                       'lib/presentation/images/maindish.svg',
                       "主菜",
-                      '/maindish',
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => DishCatalogScreen(dishCategory: '主菜'),
+                          ),
+                        );
+                      },
                     ),
                     _buildFoodButton(
                       context,
                       'lib/presentation/images/sidedish.svg',
                       "副菜",
-                      '/catalog', // 副菜は図鑑画面に遷移させる例
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => DishCatalogScreen(dishCategory: '副菜'),
+                          ),
+                        );
+                      },
                     ),
                     _buildFoodButton(
                       context,
                       'lib/presentation/images/soup.svg',
                       "汁物",
-                      '/catalog',
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => DishCatalogScreen(dishCategory: '汁物'),
+                          ),
+                        );
+                      },
                     ),
                     _buildFoodButton(
                       context,
                       'lib/presentation/images/vegetable.svg',
                       "野菜",
-                      '/catalog',
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => DishCatalogScreen(dishCategory: '野菜'),
+                          ),
+                        );
+                      },
                     ),
                     _buildFoodButton(
                       context,
                       'lib/presentation/images/other.svg',
                       "その他",
-                      '/catalog',
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) => DishCatalogScreen(dishCategory: 'その他'),
+                          ),
+                        );
+                      },
                     ),
+                    _buildEnergyInput('エネルギー', _energyController),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ],
@@ -103,10 +145,10 @@ class FoodScreen extends StatelessWidget {
     BuildContext context,
     String imagePath,
     String label,
-    String routeName,
+    VoidCallback onPressed,
   ) {
     return GestureDetector(
-      onTap: () => Navigator.of(context).pushNamed(routeName),
+      onTap: onPressed,
       child: Column(
         children: [
           CircleAvatar(
@@ -116,6 +158,41 @@ class FoodScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(label, style: const TextStyle(color: Color(0xFF9C6520))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnergyInput(String label, TextEditingController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: '$label を入力',
+                hintStyle: const TextStyle(
+                  color: Colors.grey, // 👈 ここが薄くするポイント
+                  fontSize: 14,
+                ),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          const Text(
+            'g',
+            style: TextStyle(
+              color: Color(0xFFF4B400),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );

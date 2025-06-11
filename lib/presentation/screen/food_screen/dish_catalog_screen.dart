@@ -1,29 +1,34 @@
 import 'package:flutter/material.dart';
 
 class DishCatalogScreen extends StatelessWidget {
-  const DishCatalogScreen({Key? key}) : super(key: key);
+  final String dishCategory;
+
+  const DishCatalogScreen({Key? key, required this.dishCategory})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final dishes = ['副菜1', '副菜2', '副菜3', '副菜4'];
+    final dishes = List.generate(4, (index) => '$dishCategory${index + 1}');
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('図鑑'),
+        title: Text('$dishCategory 図鑑'),
         backgroundColor: const Color(0xFFF4B400),
       ),
       body: ListView.builder(
         itemCount: dishes.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(dishes[index]),
+            title: Text('$dishCategory${index + 1}'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // ここで選択した料理の登録画面に遷移
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder:
-                      (_) => SideDishRegisterScreen(dishName: dishes[index]),
+                      (_) => DishRegisterScreen(
+                        dishName: dishes[index],
+                        category: dishCategory,
+                      ),
                 ),
               );
             },
@@ -34,17 +39,21 @@ class DishCatalogScreen extends StatelessWidget {
   }
 }
 
-class SideDishRegisterScreen extends StatelessWidget {
+class DishRegisterScreen extends StatelessWidget {
   final String dishName;
+  final String category;
 
-  const SideDishRegisterScreen({Key? key, required this.dishName})
-    : super(key: key);
+  const DishRegisterScreen({
+    Key? key,
+    required this.dishName,
+    required this.category,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('副菜登録: $dishName'),
+        title: Text('$category 登録: $dishName'),
         backgroundColor: const Color(0xFFF4B400),
       ),
       body: Center(
