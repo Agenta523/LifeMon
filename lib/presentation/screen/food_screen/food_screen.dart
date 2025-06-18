@@ -11,129 +11,135 @@ class FoodScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFA8DAB5),
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF2D9),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF4B400),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      '食事を登録',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        behavior: HitTestBehavior.opaque,
+        child: SafeArea(
+          child: Center(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF2D9),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4B400),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '食事を登録',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'ここでは今日のあなたの食事を登録できます。\nあなたの食事がモンスターの餌になります！',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
-                  child: const Text(
-                    'ここでは今日のあなたの食事を登録できます。\nあなたの食事がモンスターの餌になります！',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 20,
+                    runSpacing: 20,
+                    children: [
+                      _buildFoodButton(
+                        context,
+                        'lib/presentation/images/maindish.svg',
+                        "主菜",
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => DishCatalogScreen(dishCategory: '主菜'),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildFoodButton(
+                        context,
+                        'lib/presentation/images/sidedish.svg',
+                        "副菜",
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => DishCatalogScreen(dishCategory: '副菜'),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildFoodButton(
+                        context,
+                        'lib/presentation/images/soup.svg',
+                        "汁物",
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => DishCatalogScreen(dishCategory: '汁物'),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildFoodButton(
+                        context,
+                        'lib/presentation/images/vegetable.svg',
+                        "野菜",
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => DishCatalogScreen(dishCategory: '野菜'),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildFoodButton(
+                        context,
+                        'lib/presentation/images/other.svg',
+                        "その他",
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => DishCatalogScreen(dishCategory: 'その他'),
+                            ),
+                          );
+                        },
+                      ),
+                      EnergyInput(controller: _energyController),
+                      const SizedBox(height: 24),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 20,
-                  runSpacing: 20,
-                  children: [
-                    _buildFoodButton(
-                      context,
-                      'lib/presentation/images/maindish.svg',
-                      "主菜",
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => DishCatalogScreen(dishCategory: '主菜'),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildFoodButton(
-                      context,
-                      'lib/presentation/images/sidedish.svg',
-                      "副菜",
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => DishCatalogScreen(dishCategory: '副菜'),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildFoodButton(
-                      context,
-                      'lib/presentation/images/soup.svg',
-                      "汁物",
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => DishCatalogScreen(dishCategory: '汁物'),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildFoodButton(
-                      context,
-                      'lib/presentation/images/vegetable.svg',
-                      "野菜",
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => DishCatalogScreen(dishCategory: '野菜'),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildFoodButton(
-                      context,
-                      'lib/presentation/images/other.svg',
-                      "その他",
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => DishCatalogScreen(dishCategory: 'その他'),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildEnergyInput('エネルギー', _energyController),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -162,39 +168,156 @@ class FoodScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildEnergyInput(String label, TextEditingController controller) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: '$label を入力',
-                hintStyle: const TextStyle(
-                  color: Colors.grey, // 👈 ここが薄くするポイント
-                  fontSize: 14,
+class EnergyInput extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+
+  const EnergyInput({
+    super.key,
+    required this.controller,
+    this.label = 'エネルギー',
+  });
+
+  @override
+  State<EnergyInput> createState() => _EnergyInputState();
+}
+
+class _EnergyInputState extends State<EnergyInput>
+    with SingleTickerProviderStateMixin {
+  bool _expanded = false;
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        setState(() {
+          _expanded = false;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 折りたたみボタン
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _expanded = !_expanded;
+            });
+            if (!_expanded) return;
+            Future.delayed(const Duration(milliseconds: 300), () {
+              FocusScope.of(context).requestFocus(_focusNode);
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF4B400),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                '${widget.label} を入力',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
-                border: InputBorder.none,
               ),
             ),
           ),
-          const Text(
-            'g',
-            style: TextStyle(
-              color: Color(0xFFF4B400),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+        ),
+        // アニメーションで開く部分
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child:
+              _expanded
+                  ? Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  focusNode: _focusNode,
+                                  controller: widget.controller,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: '${widget.label} を入力',
+                                    hintStyle: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                    border: InputBorder.none,
+                                  ),
+                                  style: const TextStyle(color: Colors.black),
+                                  cursorColor: Colors.black,
+                                ),
+                              ),
+                              const Text(
+                                'g',
+                                style: TextStyle(
+                                  color: Color(0xFFF4B400),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF4B400),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            // 入力されたエネルギー値を処理する
+                            String inputValue = widget.controller.text;
+                            FocusScope.of(context).unfocus();
+                            setState(() {
+                              _expanded = false;
+                            });
+                            // 任意の処理をここに追加
+                            print('登録された値: $inputValue g');
+                          },
+                          child: const Text(
+                            '登録',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                  : const SizedBox.shrink(),
+        ),
+      ],
     );
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 }
