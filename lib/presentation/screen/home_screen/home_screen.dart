@@ -1,7 +1,11 @@
+
+
+
 import 'package:flutter/material.dart';
 import 'package:life_mon/presentation/widget/calorie_bar.dart';
 import 'package:life_mon/presentation/widget/body_icon.dart';
 import 'package:life_mon/presentation/widget/eat_value.dart';
+import 'package:rive/rive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -20,41 +24,56 @@ class _HomeScreenState extends State<HomeScreen> {
     Color.fromARGB(255, 123, 134, 255),
   ];
 
+  int selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-    int selectedIndex = 0;
-
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final ellipseWidth = screenWidth * 2.5;
-    final ellipseHeight = screenHeight * 0.7;
-    final ellipseLeft = (screenWidth - ellipseWidth) / 2;
-    final ellipseTop = screenHeight * 0.4;
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Positioned(
-              top: screenHeight * 0.1,
-              left: screenWidth * 0.1,
-              right: 0,
-              child: BodyIcons(
-                icons: icons,
-                labels: labels,
-                colors_list: colors_list,
-                selectedIndex: selectedIndex,
-                onSelected: (index) {
-                  setState(() {
-                    selectedIndex = index;
-                  });
-                },
+      body: Stack(
+        children: [
+          // RiveAnimationの配置
+          Positioned(
+            top: screenHeight * 0.3,
+            left: screenWidth * 0.5 - (screenWidth * 0.2 / 2),
+            child: SizedBox(
+              height: screenHeight * 0.2,
+              width: screenWidth * 0.2,
+              child: RiveAnimation.asset(
+                'lib/presentation/animations/teddycat.riv',
+                animations: const['Timeline1'],
+                fit: BoxFit.contain,
               ),
             ),
-            CalorieBar(), // カロリーバーを表示
-          ],
-        ),
+          ),
+          // BodyIconsの配置 (RiveAnimationより上に調整)
+          Positioned(
+            top: screenHeight * 0.6, // こちらの値を調整して、RiveAnimationと重ならないようにします
+            left: screenWidth * 0,
+            right: 0,
+            child: BodyIcons(
+              icons: icons,
+              labels: labels,
+              colors_list: colors_list,
+              selectedIndex: selectedIndex,
+              onSelected: (index) {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+            ),
+          ),
+          // CalorieBarの配置
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: CalorieBar(),
+            ),
+          ),
+        ],
       ),
     );
   }
