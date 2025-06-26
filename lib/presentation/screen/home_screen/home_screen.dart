@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen>
       name: 'ハルオ',
       description: '元気でやさしい筋トレ好きキャラ',
       riveFile: 'lib/presentation/images/character3.riv',
-      iconImage: 'lib/presentation/images/character3icon.png',
+      iconImage: 'lib/presentation/images/character3_icon.png',
     ),
     CharacterInfo(
       name: 'ユウコ',
