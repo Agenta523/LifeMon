@@ -21,7 +21,10 @@ class FoodNavigator extends StatelessWidget {
             builder = (context) => const MainDishScreen();
             break;
           case '/catalog':
-            builder = (context) => const DishCatalogScreen();
+            // dishCategory を arguments から取得して渡す
+            final dishCategory = settings.arguments as String;
+            builder =
+                (context) => DishCatalogScreen(dishCategory: dishCategory);
             break;
           default:
             builder = (context) => const FoodScreen();
