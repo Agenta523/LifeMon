@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import './NutrientSelector.dart';
 import './FLChartData.dart';
+import './zigzagIconPainter.dart';
 
 class AnalyzeScreen extends StatefulWidget {
   const AnalyzeScreen({super.key});
@@ -16,7 +17,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   Color getLineColor(int index) {
     switch (index) {
       case 0:
-        return const Color.fromARGB(255, 255, 122, 27);
+        return const Color.fromARGB(255, 253, 163, 120);
       case 1:
         return const Color.fromARGB(255, 255, 123, 134);
       case 2:
@@ -81,11 +82,35 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         children: [
           Container(
             decoration: BoxDecoration(
-               gradient: LinearGradient(
-                colors: [Colors.white,lineColor],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-               )
+               color: lineColor.withOpacity(0.5)
+            ),
+          ),
+          Positioned(
+            top: screenHeight * 0.08, // ← 任意の縦位置
+            left: 0,
+            right: 0, // 横幅を全体に広げることで Center が使える
+            child: Center(
+              child: Text(
+                labels[selectedIndex],
+                style: TextStyle(
+                  fontSize: screenHeight * 0.05,
+                  fontWeight: FontWeight.bold,
+                  color:Color.alphaBlend(Colors.black.withOpacity(0.3), lineColor),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: ellipseLeft,
+            child:CustomPaint(
+              painter: ZigzagIconPainter(
+                rows:10,
+                columns:6,
+                iconSize: screenHeight * 0.05,
+                spacing: screenHeight * 0.15,
+                icons: icons[selectedIndex],
+                color: lineColor.withOpacity(0.4),
+              ),
             ),
           ),
           Positioned(
@@ -111,7 +136,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
             ),
           ),
           Positioned(
-            top: screenHeight * 0.1,
+            top: screenHeight * 0.15,
             left: 0,
             right: 0,
             child: NutrientSelector(

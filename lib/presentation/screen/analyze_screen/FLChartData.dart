@@ -120,7 +120,7 @@ class FLChartData extends StatelessWidget {
       label = reorderedLabels[index];
     }
     return SideTitleWidget(
-      meta: meta, // ここに meta: meta を追加
+      axisSide: meta.axisSide,
       child: Text(label, style: style),
     );
   }
