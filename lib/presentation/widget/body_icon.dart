@@ -55,43 +55,36 @@ class _BodyIcons extends State<BodyIcons> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        controller: _scrollController,
-        scrollDirection: Axis.horizontal,
-        itemCount: widget.labels.length,
-        itemBuilder: (context, index) {
-          for (int i = 0; i < 3;) {
-            return Padding(
-              padding: const EdgeInsets.all(20.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(widget.labels.length, (index) {
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: GestureDetector(
+                onTap: () => widget.onSelected(index),
                 child: Container(
-                  height: MediaQuery.of(context).size.height * 0.25,
-                  width: MediaQuery.of(context).size.width * 0.25,
+                  height: MediaQuery.of(context).size.width * 0.3,
                   decoration: BoxDecoration(
                     color: widget.colors_list[index],
                     shape: BoxShape.circle,
                   ),
-                  alignment: Alignment.center,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         widget.icons[index],
                         color: Colors.white,
-                        size:
-                            [
-                              MediaQuery.of(context).size.width,
-                              MediaQuery.of(context).size.height,
-                            ].reduce(min) *
-                            0.08,
+                        size: MediaQuery.of(context).size.width * 0.08,
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         widget.labels[index],
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       ),
-                      const SizedBox(height: 6), // 余白を追加
+                      const SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
@@ -99,7 +92,6 @@ class _BodyIcons extends State<BodyIcons> {
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -114,9 +106,9 @@ class _BodyIcons extends State<BodyIcons> {
                   ),
                 ),
               ),
-            );
-          }
-        },
+            ),
+          );
+        }),
       ),
     );
   }
