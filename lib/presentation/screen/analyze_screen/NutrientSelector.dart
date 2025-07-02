@@ -67,8 +67,15 @@ class _NutrientSelectorState extends State<NutrientSelector> {
                 height: 150,
                 width: 150,
                 decoration: BoxDecoration(
-                  color: isSelected ? widget.buttonColor : widget.buttonColor.withOpacity(0.2),
+                  color: isSelected ? widget.buttonColor : Color.alphaBlend(Colors.white.withOpacity(0.3),widget.buttonColor),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      offset: Offset(0, 4),
+                      blurRadius: 8
+                    )
+                  ],
                 ),
                 alignment: Alignment.center,
                 child: Column(
@@ -76,15 +83,9 @@ class _NutrientSelectorState extends State<NutrientSelector> {
                   children:[
                     Icon(
                       widget.icons[index],
-                      color: isSelected ? Colors.white : Colors.grey[800],
+                      color: isSelected ? Colors.white : Colors.white,
                       size: 40,
                     ),
-                    Text(
-                      widget.labels[index],
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.grey[800],
-                      ),
-                    )
                   ] 
                 ),
               ),
