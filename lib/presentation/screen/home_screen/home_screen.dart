@@ -1,8 +1,24 @@
+// lib/presentation/screen/home_screen/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rive/rive.dart';
+import 'package:flutter/services.dart';
+
 import 'package:life_mon/presentation/widget/calorie_bar.dart';
 import 'package:life_mon/presentation/widget/body_icon.dart';
-import 'package:rive/rive.dart';
+
+class CharacterInfo {
+  final String name;
+  final String description;
+  final String riveFile;
+  final String iconImage;
+
+  CharacterInfo({
+    required this.name,
+    required this.description,
+    required this.riveFile,
+    required this.iconImage,
+  });
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,137 +27,231 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class CustomProfileBar extends StatelessWidget {
-  final String name;
-  final String message;
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  final List<CharacterInfo> characters = [
+    CharacterInfo(
+      name: 'ハルオ',
+      description: '元気でやさしい筋トレ好きキャラ',
+      riveFile: 'lib/presentation/images/character3.riv',
+      iconImage: 'lib/presentation/images/character3_icon.png',
+    ),
+    CharacterInfo(
+      name: 'ユウコ',
+      description: '冷静で賢い分析キャラ',
+      riveFile: 'lib/presentation/images/character2.riv',
+      iconImage: 'lib/presentation/images/character2_icon.png',
+    ),
+    CharacterInfo(
+      name: 'モフィメット',
+      description: '植物と話す自然派キャラ',
+      riveFile: 'lib/presentation/images/character3.riv',
+      iconImage: 'lib/presentation/images/character3_icon.png',
+    ),
+  ];
 
-  const CustomProfileBar({
-    super.key,
-    required this.name,
-    required this.message,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width * 0.5;
-    double height = 80;
-
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(40),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 10),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // 白い丸背景（プロフィール画像の下）
-              Container(
-                width: 56,
-                height: 56,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-              ),
-
-              // プロフィール画像
-              const CircleAvatar(
-                radius: 24,
-                backgroundImage: AssetImage('assets/profile_icon.png'),
-              ),
-
-              // 赤ポチ（左上）
-              Positioned(
-                top: 4,
-                left: 4,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 14),
-
-          // 名前 + コメント
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                message,
-                style: const TextStyle(fontSize: 13, color: Colors.black54),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  List<IconData> icons = [Icons.fitness_center, Icons.bolt, Icons.school];
-  List<String> labels = ["タンパク質", "脂質", "炭水化物"];
-  List<int> eat_value = [60, 30, 120];
-  List<int> eat_value_base = [90, 60, 250];
-
-  final colors_list = <Color>[
+  final List<IconData> icons = [Icons.fitness_center, Icons.bolt, Icons.school];
+  final List<String> labels = ["タンパク質", "脂質", "炭水化物"];
+  final List<Color> colors_list = [
     Color.fromARGB(255, 255, 123, 134),
     Color.fromARGB(255, 255, 187, 0),
     Color.fromARGB(255, 123, 134, 255),
   ];
-
+  final List<int> eat_value_base = [90, 60, 250];
+  List<int> eat_value = [70, 50, 200];
   int selectedIndex = 0;
 
-  // キャラクターアセット（Riveファイル）リスト
-  final List<String> characterRives = [
-    'lib/presentation/images/character1.riv',
-    'lib/presentation/images/character2.riv',
-    'lib/presentation/images/character3.riv',
-  ];
-
-  final List<String> characterIcons = [
-    'lib/presentation/images/character1_icon.png',
-    'lib/presentation/images/character2_icon.png',
-    'lib/presentation/images/character3_icon.png',
-  ];
-
   int selectedCharacterIndex = 0;
+  Artboard? _artboard;
+  RiveAnimationController? _controller;
+
+  double characterX = 100.0;
+  double characterY = 300.0;
+  late AnimationController _animationController;
+  late Animation<double> _xAnimation;
+  late Animation<double> _yAnimation;
+  bool isFacingLeft = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRive(characters[selectedCharacterIndex].riveFile);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  Future<void> _loadRive(String path) async {
+    final data = await rootBundle.load(path);
+    final file = RiveFile.import(data);
+    final artboard = file.mainArtboard;
+    final controller = SimpleAnimation('待機');
+    artboard.addController(controller);
+
+    setState(() {
+      _artboard = artboard;
+      _controller = controller;
+    });
+  }
+
+  void _moveCharacterTo(Offset target) {
+    if (_artboard == null) return;
+
+    final distance = (Offset(characterX, characterY) - target).distance;
+
+    final duration = Duration(
+      milliseconds: (distance * 5).clamp(300, 2000).toInt(),
+    );
+
+    setState(() {
+      isFacingLeft = target.dx < characterX;
+    });
+
+    _artboard!.removeController(_controller!);
+    final walk = SimpleAnimation('歩く');
+    _artboard!.addController(walk);
+    _controller = walk;
+
+    _xAnimation = Tween<double>(
+      begin: characterX,
+      end: target.dx,
+    ).animate(_animationController);
+    _yAnimation = Tween<double>(
+      begin: characterY,
+      end: target.dy,
+    ).animate(_animationController);
+
+    _animationController.stop();
+    _animationController.reset();
+
+    // リスナーが複数重複しないように remove してから add
+    _animationController.removeListener(_updateCharacterPosition);
+    _animationController.removeStatusListener(_handleAnimationStatus);
+
+    _animationController.addListener(_updateCharacterPosition);
+    _animationController.addStatusListener(_handleAnimationStatus);
+    _animationController.forward();
+
+    _animationController.addListener(() {
+      setState(() {
+        characterX = _xAnimation.value;
+        characterY = _yAnimation.value;
+      });
+    });
+
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _artboard!.removeController(_controller!);
+        final idle = SimpleAnimation('待機');
+        _artboard!.addController(idle);
+        _controller = idle;
+      }
+    });
+
+    _animationController.forward(from: 0.0);
+  }
+
+  void _updateCharacterPosition() {
+    setState(() {
+      characterX = _xAnimation.value;
+      characterY = _yAnimation.value;
+    });
+  }
+
+  void _handleAnimationStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _artboard!.removeController(_controller!);
+      final idle = SimpleAnimation('idle');
+      _artboard!.addController(idle);
+      _controller = idle;
+    }
+  }
+
+  void _showCharacterSelectionDialog() {
+    int tempIndex = selectedCharacterIndex;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: 480,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: StatefulBuilder(
+              builder: (context, setModalState) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      characters[tempIndex].name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      characters[tempIndex].description,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: PageView.builder(
+                        itemCount: characters.length,
+                        controller: PageController(viewportFraction: 0.8),
+                        onPageChanged: (index) {
+                          setModalState(() => tempIndex = index);
+                        },
+                        itemBuilder: (context, index) {
+                          return Transform.scale(
+                            scale: index == tempIndex ? 1.0 : 0.85,
+                            child: RiveAnimation.asset(
+                              characters[index].riveFile,
+                              fit: BoxFit.fill,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          selectedCharacterIndex = tempIndex;
+                        });
+                        _loadRive(characters[tempIndex].riveFile);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("呼ぶ"),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
+          /// 背景
           Positioned.fill(
             child: Image.asset(
               'lib/presentation/images/background.png',
@@ -149,60 +259,82 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // キャラクター画像表示（中央あたりに重ねて表示）
-          Positioned(
-            top: screenHeight * 0.2,
-            left: screenWidth * 0.5 - 100,
-            child: SizedBox(
-              width: 200,
-              height: 200,
-              child: Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.identity()..scale(-1.0, 1.0),
-                child: RiveAnimation.asset(
-                  characterRives[selectedCharacterIndex],
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-
+          /// ユーザープロフィール
           Positioned(
             top: 40,
             left: 20,
-            child: CustomProfileBar(name: "ハルオ", message: "元気に頑張ってます！"),
+            child: Row(
+              children: const [
+                CircleAvatar(backgroundColor: Colors.grey, radius: 24),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "ユーザー名",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text("今日も元気に活動中", style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
           ),
 
-          // キャラクター選択アイコン（右上）
+          /// キャラ選択ボタン
           Positioned(
             top: 40,
             right: 20,
             child: GestureDetector(
-              onTap: () {
-                _showCharacterSelectionDialog(
-                  context: context,
-                  characterRivePaths: characterRives,
-                  currentIndex: selectedCharacterIndex,
-                  onCharacterSelected: (index) {
-                    setState(() {
-                      selectedCharacterIndex = index;
-                    });
-                  },
-                );
-              },
+              onTap: _showCharacterSelectionDialog,
               child: CircleAvatar(
                 backgroundImage: AssetImage(
-                  characterIcons[selectedCharacterIndex],
+                  characters[selectedCharacterIndex].iconImage,
                 ),
                 radius: 25,
               ),
             ),
           ),
 
+          /// キャラクターの移動
+          GestureDetector(
+            onTapDown: (details) {
+              final local = details.localPosition;
+              _moveCharacterTo(Offset(local.dx - 100, local.dy - 100));
+            },
+            child: Stack(
+              children: [
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 0),
+                  left: characterX,
+                  top: characterY,
+                  child: SizedBox(
+                    width: 200,
+                    height: 200,
+                    child:
+                        _artboard != null
+                            ? Transform(
+                              alignment: Alignment.center,
+                              transform:
+                                  Matrix4.identity()
+                                    ..scale(isFacingLeft ? 1.0 : -1.0, 1.0),
+                              child: Rive(artboard: _artboard!),
+                            )
+                            : const SizedBox(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          /// 下部
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              CalorieBar(),
+              const CalorieBar(),
               BodyIcons(
                 icons: icons,
                 labels: labels,
@@ -221,82 +353,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  // キャラクター選択画面
-  void _showCharacterSelectionDialog({
-    required BuildContext context,
-    required List<String> characterRivePaths,
-    required Function(int selectedIndex) onCharacterSelected,
-    int currentIndex = 0,
-  }) {
-    int tempIndex = currentIndex;
-
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: 420,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: StatefulBuilder(
-              builder: (context, setModalState) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'キャラクターを選んでください',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // キャラ表示スライダー
-                    Expanded(
-                      child: PageView.builder(
-                        itemCount: characterRivePaths.length,
-                        controller: PageController(viewportFraction: 0.8),
-                        onPageChanged: (index) {
-                          setModalState(() {
-                            tempIndex = index;
-                          });
-                        },
-                        itemBuilder: (context, index) {
-                          return Transform.scale(
-                            scale: index == tempIndex ? 1.0 : 0.85,
-                            child: RiveAnimation.asset(
-                              characterRivePaths[index],
-                              fit: BoxFit.contain,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    ElevatedButton(
-                      onPressed: () {
-                        onCharacterSelected(tempIndex);
-                        Navigator.pop(context);
-                      },
-                      child: const Text("呼ぶ"),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        );
-      },
     );
   }
 }

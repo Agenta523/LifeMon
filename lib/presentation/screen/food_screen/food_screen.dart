@@ -7,7 +7,10 @@ class FoodScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController _energyController = TextEditingController();
+    // ✅ ここで3つのコントローラーを定義
+    final TextEditingController _proteinController = TextEditingController();
+    final TextEditingController _fatController = TextEditingController();
+    final TextEditingController _carbController = TextEditingController();
 
     return Scaffold(
       backgroundColor: const Color(0xFFA8DAB5),
@@ -134,7 +137,12 @@ class FoodScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      EnergyInput(controller: _energyController),
+                      // ✅ EnergyInput を正しいパラメータで呼ぶ
+                      EnergyInput(
+                        proteinController: _proteinController,
+                        fatController: _fatController,
+                        carbController: _carbController,
+                      ),
                       const SizedBox(height: 24),
                     ],
                   ),
@@ -171,13 +179,15 @@ class FoodScreen extends StatelessWidget {
 }
 
 class EnergyInput extends StatefulWidget {
-  final TextEditingController controller;
-  final String label;
+  final TextEditingController proteinController;
+  final TextEditingController fatController;
+  final TextEditingController carbController;
 
   const EnergyInput({
     super.key,
-    required this.controller,
-    this.label = 'エネルギー',
+    required this.proteinController,
+    required this.fatController,
+    required this.carbController,
   });
 
   @override
@@ -187,18 +197,43 @@ class EnergyInput extends StatefulWidget {
 class _EnergyInputState extends State<EnergyInput>
     with SingleTickerProviderStateMixin {
   bool _expanded = false;
-  final FocusNode _focusNode = FocusNode();
 
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      if (!_focusNode.hasFocus) {
-        setState(() {
-          _expanded = false;
-        });
-      }
-    });
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: '$label を入力',
+                hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                border: InputBorder.none,
+              ),
+              style: const TextStyle(color: Colors.black),
+              cursorColor: Colors.black,
+            ),
+          ),
+          const Text(
+            'g',
+            style: TextStyle(
+              color: Color(0xFFF4B400),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -206,15 +241,11 @@ class _EnergyInputState extends State<EnergyInput>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 折りたたみボタン
+        /// 折りたたみボタン
         GestureDetector(
           onTap: () {
             setState(() {
               _expanded = !_expanded;
-            });
-            if (!_expanded) return;
-            Future.delayed(const Duration(milliseconds: 300), () {
-              FocusScope.of(context).requestFocus(_focusNode);
             });
           },
           child: Container(
@@ -223,10 +254,10 @@ class _EnergyInputState extends State<EnergyInput>
               color: const Color(0xFFF4B400),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Center(
+            child: const Center(
               child: Text(
-                '${widget.label} を入力',
-                style: const TextStyle(
+                '栄養を入力',
+                style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -235,7 +266,8 @@ class _EnergyInputState extends State<EnergyInput>
             ),
           ),
         ),
-        // アニメーションで開く部分
+
+        /// 展開部分
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -245,42 +277,25 @@ class _EnergyInputState extends State<EnergyInput>
                     padding: const EdgeInsets.only(top: 12),
                     child: Column(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  focusNode: _focusNode,
-                                  controller: widget.controller,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    hintText: '${widget.label} を入力',
-                                    hintStyle: const TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 14,
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                  style: const TextStyle(color: Colors.black),
-                                  cursorColor: Colors.black,
-                                ),
-                              ),
-                              const Text(
-                                'g',
-                                style: TextStyle(
-                                  color: Color(0xFFF4B400),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                        /// タンパク質
+                        _buildInputField(
+                          label: 'タンパク質',
+                          controller: widget.proteinController,
                         ),
-                        const SizedBox(height: 12),
+
+                        /// 脂質
+                        _buildInputField(
+                          label: '脂質',
+                          controller: widget.fatController,
+                        ),
+
+                        /// 炭水化物
+                        _buildInputField(
+                          label: '炭水化物',
+                          controller: widget.carbController,
+                        ),
+
+                        /// 登録ボタン
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFF4B400),
@@ -289,14 +304,16 @@ class _EnergyInputState extends State<EnergyInput>
                             ),
                           ),
                           onPressed: () {
-                            // 入力されたエネルギー値を処理する
-                            String inputValue = widget.controller.text;
+                            final protein = widget.proteinController.text;
+                            final fat = widget.fatController.text;
+                            final carb = widget.carbController.text;
+
+                            print('登録: タンパク質=$protein, 脂質=$fat, 炭水化物=$carb');
+
                             FocusScope.of(context).unfocus();
                             setState(() {
                               _expanded = false;
                             });
-                            // 任意の処理をここに追加
-                            print('登録された値: $inputValue g');
                           },
                           child: const Text(
                             '登録',
@@ -313,11 +330,5 @@ class _EnergyInputState extends State<EnergyInput>
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
   }
 }
