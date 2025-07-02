@@ -1,4 +1,3 @@
-// lib/presentation/screen/home_screen/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'package:flutter/services.dart';
@@ -98,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_artboard == null) return;
 
     final distance = (Offset(characterX, characterY) - target).distance;
-
     final duration = Duration(
       milliseconds: (distance * 5).clamp(300, 2000).toInt(),
     );
@@ -124,29 +122,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _animationController.stop();
     _animationController.reset();
 
-    // リスナーが複数重複しないように remove してから add
     _animationController.removeListener(_updateCharacterPosition);
     _animationController.removeStatusListener(_handleAnimationStatus);
 
     _animationController.addListener(_updateCharacterPosition);
     _animationController.addStatusListener(_handleAnimationStatus);
-    _animationController.forward();
-
-    _animationController.addListener(() {
-      setState(() {
-        characterX = _xAnimation.value;
-        characterY = _yAnimation.value;
-      });
-    });
-
-    _animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _artboard!.removeController(_controller!);
-        final idle = SimpleAnimation('待機');
-        _artboard!.addController(idle);
-        _controller = idle;
-      }
-    });
 
     _animationController.forward(from: 0.0);
   }
@@ -161,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _handleAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       _artboard!.removeController(_controller!);
-      final idle = SimpleAnimation('idle');
+      final idle = SimpleAnimation('待機');
       _artboard!.addController(idle);
       _controller = idle;
     }
@@ -259,6 +239,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
+          /// 全画面タップでキャラ移動
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: (details) {
+                final local = details.localPosition;
+                _moveCharacterTo(Offset(local.dx - 100, local.dy - 100));
+              },
+            ),
+          ),
+
+          /// キャラクター
+          Positioned(
+            left: characterX,
+            top: characterY,
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child:
+                  _artboard != null
+                      ? Transform(
+                        alignment: Alignment.center,
+                        transform:
+                            Matrix4.identity()
+                              ..scale(isFacingLeft ? 1.0 : -1.0, 1.0),
+                        child: Rive(artboard: _artboard!),
+                      )
+                      : const SizedBox(),
+            ),
+          ),
+
+          /// キャラ選択ボタン（必ず一番上！）
+          Positioned(
+            top: 40,
+            right: 20,
+            child: GestureDetector(
+              onTap: _showCharacterSelectionDialog,
+              child: CircleAvatar(
+                backgroundImage: AssetImage(
+                  characters[selectedCharacterIndex].iconImage,
+                ),
+                radius: 25,
+              ),
+            ),
+          ),
+
           /// ユーザープロフィール
           Positioned(
             top: 40,
@@ -284,53 +310,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-          /// キャラ選択ボタン
-          Positioned(
-            top: 40,
-            right: 20,
-            child: GestureDetector(
-              onTap: _showCharacterSelectionDialog,
-              child: CircleAvatar(
-                backgroundImage: AssetImage(
-                  characters[selectedCharacterIndex].iconImage,
-                ),
-                radius: 25,
-              ),
-            ),
-          ),
-
-          /// キャラクターの移動
-          GestureDetector(
-            onTapDown: (details) {
-              final local = details.localPosition;
-              _moveCharacterTo(Offset(local.dx - 100, local.dy - 100));
-            },
-            child: Stack(
-              children: [
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 0),
-                  left: characterX,
-                  top: characterY,
-                  child: SizedBox(
-                    width: 200,
-                    height: 200,
-                    child:
-                        _artboard != null
-                            ? Transform(
-                              alignment: Alignment.center,
-                              transform:
-                                  Matrix4.identity()
-                                    ..scale(isFacingLeft ? 1.0 : -1.0, 1.0),
-                              child: Rive(artboard: _artboard!),
-                            )
-                            : const SizedBox(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          /// 下部
+          /// 下部 UI
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
