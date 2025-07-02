@@ -36,12 +36,12 @@ class FLChartData extends StatelessWidget {
               dotData: FlDotData(
                 show: true,
                 getDotPainter: (spot, percent, barData, index) =>
-                FlDotCirclePainter(
-                  radius: 3.0,
-                  color: lineColor,
-                  strokeWidth: 2.0,
-                  strokeColor: lineColor,
-                ),
+                    FlDotCirclePainter(
+                      radius: 3.0,
+                      color: lineColor,
+                      strokeWidth: 2.0,
+                      strokeColor: lineColor,
+                    ),
               ),
               barWidth: 3,
             ),
@@ -61,12 +61,12 @@ class FLChartData extends StatelessWidget {
           titlesData: FlTitlesData(
             bottomTitles: AxisTitles(
               axisNameWidget: Padding(
-                padding: const EdgeInsets.only(left: 60),
-                child:Align(
-                  alignment: Alignment.center,
-                  child: const Text("曜日", style: TextStyle(color: Color(0xffCDCDCD))),
-                ) 
-              ) ,          
+                  padding: const EdgeInsets.only(left: 60),
+                  child:Align(
+                    alignment: Alignment.center,
+                    child: const Text("曜日", style: TextStyle(color: Color(0xffCDCDCD))),
+                  )
+              ) ,
               axisNameSize: 22.0,
               sideTitles: SideTitles(
                 showTitles: true,
@@ -76,14 +76,14 @@ class FLChartData extends StatelessWidget {
               ),
             ),
             leftTitles: AxisTitles(
-              axisNameSize: 22.0, 
+              axisNameSize: 22.0,
               axisNameWidget:Padding(
                 padding: const EdgeInsets.only(left: 60),
                 child:Align(
                   alignment: Alignment.center,
                   child: Text(unit, style: TextStyle(color: Color(0xffCDCDCD))),
                 ),
-              ),               
+              ),
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 40.0,
@@ -104,8 +104,10 @@ class FLChartData extends StatelessWidget {
       fontWeight: FontWeight.bold,
       fontSize: 16.0,
     );
-    
+
     final labels = ['月', '火', '水', '木', '金', '土', '日'];
+    // DateTime.now().weekday は 1 (月) から 7 (日) なので、配列のインデックスに合わせる
+    // 現在時刻は水曜日 (2025年6月11日) なので、todayIndexは 2 (水曜日) です。
     int todayIndex = DateTime.now().weekday - 1;
 
     List<String> reorderedLabels = [
@@ -117,7 +119,6 @@ class FLChartData extends StatelessWidget {
     if (index >= 0 && index < reorderedLabels.length) {
       label = reorderedLabels[index];
     }
-
     return SideTitleWidget(
       axisSide: meta.axisSide,
       child: Text(label, style: style),
