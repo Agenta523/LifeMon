@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'package:life_mon/presentation/widget/calorie_bar.dart';
 import 'package:life_mon/presentation/widget/body_icon.dart';
+import 'package:life_mon/presentation/screen/profile_screen/profile_screen.dart';
 
 class CharacterInfo {
   final String name;
@@ -244,9 +245,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _animationController.dispose();
     super.dispose();
   }
+  /// プロフィール関連の変数
+  String height = ""; // 身長
+  String age = ""; // 年齢
+  int? sex = 0; // 0: 男性, 1: 女性
+  int? selectedActivityIndex; //活動レベル
+  String goalType = "増量"; // 増減量
+  String weight = ""; // 目標体重変化量
 
   @override
   Widget build(BuildContext context) {
+    //profileを非同期で呼び出し（モーダル表示）
+    void _openProfileDialog() async {
+      final result = await showModalBottomSheet<Map<String, dynamic>>(
+        context: context,
+        isScrollControlled: true, 
+        builder: (context) {
+          return FractionallySizedBox(
+            heightFactor:1.0,
+            child: Profile(
+              initialActivityIndex: selectedActivityIndex,
+              initialGoalType: goalType,
+              initialWeight: weight,
+              /*
+              これから追加
+              initialHeight: height,
+              initialAge: age,
+              initialSex: sex
+              */
+            ),
+          );
+        },
+      );
+
+      if (result != null) {
+        setState(() {
+          selectedActivityIndex = result['activityIndex'];
+          goalType = result['goalType'];
+          weight = result['weight'];
+        });
+      }
+      debugPrint("✅ initState called: $selectedActivityIndex, $goalType, $weight");
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -263,25 +304,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Positioned(
             top: 40,
             left: 20,
-            child: Row(
-              children: const [
-                CircleAvatar(backgroundColor: Colors.grey, radius: 24),
-                SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "ユーザー名",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+            child:GestureDetector(
+              onTap: () => _openProfileDialog(),
+              child: Row(
+                children: const [
+                  CircleAvatar(backgroundColor: Colors.grey, radius: 24),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "ユーザー名",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text("今日も元気に活動中", style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ],
+                      Text("今日も元気に活動中", style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ],
             ),
+            )
+            
           ),
 
           /// キャラ選択ボタン
