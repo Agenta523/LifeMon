@@ -70,9 +70,8 @@ flutter:
     - lib/presentation/images/soup.svg
     - lib/presentation/images/vegetable.svg
     - lib/presentation/images/background.png
-    - lib/presentation/images/character1.riv
-    - lib/presentation/images/character2.riv
-    - lib/presentation/images/character3.riv
+    - lib/presentation/images/cat.riv
+    - lib/presentation/images/mohu.riv
     - lib/presentation/images/character1_icon.png
     - lib/presentation/images/character2_icon.png
     - lib/presentation/images/character3_icon.png
