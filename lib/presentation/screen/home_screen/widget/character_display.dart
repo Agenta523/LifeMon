@@ -29,7 +29,7 @@ class CharacterDisplay extends StatelessWidget {
         height: size,
         child: Transform(
           alignment: Alignment.center,
-          transform: Matrix4.identity()..scale(isFacingLeft ? -1.0 : 1.0, 1.0),
+          transform: Matrix4.identity()..scale(isFacingLeft ? 1.0 : -1.0, 1.0),
           child: Rive(artboard: artboard),
         ),
       ),

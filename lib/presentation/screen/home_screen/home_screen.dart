@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Character State
   int selectedCharacterIndex = 0;
   Artboard? _artboard;
-  RiveAnimationController? _controller; // ★ 修正: 現在のコントローラーを保持
+  RiveAnimationController? _controller;
   late AnimationController _animationController;
   late Animation<double> _xAnimation;
   late Animation<double> _yAnimation;
@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
-    _controller?.dispose(); // ★ 修正: コントローラーをdispose
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -109,7 +109,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final file = RiveFile.import(data);
     final artboard = file.mainArtboard;
 
-    // ★ 修正: 古いコントローラーが存在すれば削除
     if (_controller != null) {
       artboard.removeController(_controller!);
       _controller!.dispose();
@@ -120,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     setState(() {
       _artboard = artboard;
-      _controller = newController; // ★ 修正: 新しいコントローラーを保持
+      _controller = newController;
     });
   }
 
@@ -131,12 +130,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       isFacingLeft = target.dx < characterX!;
     });
 
-    // ★ 修正: 現在のコントローラーを削除
     if (_controller != null) {
       _artboard!.removeController(_controller!);
     }
 
-    // ★ 修正: 新しい'walk'コントローラーを作成し、保持する
     final walkController = SimpleAnimation('walk');
     _artboard!.addController(walkController);
     _controller = walkController;
@@ -162,12 +159,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _handleAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      // ★ 修正: 'walk'コントローラーを削除
       if (_controller != null) {
         _artboard?.removeController(_controller!);
       }
 
-      // ★ 修正: 新しい'state'コントローラーを作成し、保持する
       final idleController = SimpleAnimation('state');
       _artboard?.addController(idleController);
       _controller = idleController;
