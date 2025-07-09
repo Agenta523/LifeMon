@@ -228,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   /// プロフィール関連の変数
   String height = ""; // 身長
   String age = ""; // 年齢
-  int? sex = 0; // 0: 男性, 1: 女性
+  String sex = "男"; // 0: 男性, 1: 女性
   int? selectedActivityIndex; //活動レベル
   String goalType = "増量"; // 増減量
   String weight = ""; // 目標体重変化量
@@ -247,12 +247,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               initialActivityIndex: selectedActivityIndex,
               initialGoalType: goalType,
               initialWeight: weight,
-              /*
-              これから追加
               initialHeight: height,
               initialAge: age,
-              initialSex: sex
-              */
+              initialSex: sex,
             ),
           );
         },
@@ -263,9 +260,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           selectedActivityIndex = result['activityIndex'];
           goalType = result['goalType'];
           weight = result['weight'];
+          height = result['height'];
+          age = result['age'];
+          sex = result['sex'];
         });
       }
-      debugPrint("✅ initState called: $selectedActivityIndex, $goalType, $weight");
+      debugPrint("✅ initState called: $selectedActivityIndex, $goalType, $weight, $height");
     }
 
     return Scaffold(
