@@ -65,12 +65,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final double characterSize = 200.0;
 
   // Profile State
-  String height = "";
-  String age = "";
-  int? sex = 0;
-  int? selectedActivityIndex;
-  String goalType = "増量";
-  String weight = "";
+  String height = ""; // 身長
+  String age = ""; // 年齢
+  String sex = "男"; // 性別
+  int? selectedActivityIndex; //活動レベル
+  String goalType = "増量"; // 増減量
+  String weight = ""; // 目標体重変化量
 
   @override
   void initState() {
@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _loadRive(characters[index].riveFile);
   }
 
-  // --- Dialog Methods (変更なし) ---
+  // --- Dialog Methods ---
   void _showCharacterSelectionDialog() {
     showDialog(
       context: context,
@@ -215,26 +215,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       isScrollControlled: true,
-      builder:
-          (context) => FractionallySizedBox(
-            heightFactor: 1.0,
-            child: Profile(
-              initialActivityIndex: selectedActivityIndex,
-              initialGoalType: goalType,
-              initialWeight: weight,
-            ),
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 1.0,
+          child: Profile(
+            initialActivityIndex: selectedActivityIndex,
+            initialGoalType: goalType,
+            initialWeight: weight,
+            initialHeight: height,
+            initialAge: age,
+            initialSex: sex,
           ),
+        );
+      },
     );
+
     if (result != null) {
       setState(() {
         selectedActivityIndex = result['activityIndex'];
         goalType = result['goalType'];
         weight = result['weight'];
+        height = result['height'];
+        age = result['age'];
+        sex = result['sex'];
       });
     }
+    debugPrint(
+      "✅ Profile updated: $selectedActivityIndex, $goalType, $weight, $height",
+    );
   }
 
-  // --- Build Method (変更なし) ---
+  // --- Build Method ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(

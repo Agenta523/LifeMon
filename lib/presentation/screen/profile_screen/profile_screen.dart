@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:life_mon/presentation/screen/profile_screen/ActivityLevel.dart';
-import 'package:life_mon/presentation/screen/profile_screen/GoalWeight.dart';
+import 'activityLevel.dart';
+import 'goalWeight.dart';
+import 'height.dart';
+import 'age.dart';
+import 'sex.dart';
 
 class Profile extends StatefulWidget {
   final int? initialActivityIndex;
   final String initialGoalType;
   final String initialWeight;
+  final String initialHeight;
+  final String initialAge;
+  final String initialSex;
 
   const Profile({
     super.key,
     this.initialActivityIndex,
     required this.initialGoalType,
     required this.initialWeight,
+    required this.initialHeight,
+    required this.initialAge,
+    required this.initialSex,
   });
 
   @override
@@ -22,6 +31,9 @@ class _ProfileState extends State<Profile> {
   late int? selectedActivityIndex;
   late String goalType;
   late TextEditingController weightController;
+  late TextEditingController heightController;
+  late TextEditingController ageController;
+  late String sexType;
 
   @override
   void initState() {
@@ -29,6 +41,9 @@ class _ProfileState extends State<Profile> {
     selectedActivityIndex = widget.initialActivityIndex;
     goalType = widget.initialGoalType;
     weightController = TextEditingController(text: widget.initialWeight);
+    heightController = TextEditingController(text: widget.initialHeight);
+    ageController = TextEditingController(text: widget.initialAge);
+    sexType = widget.initialSex;
   }
 
   void _closeModal() {
@@ -36,6 +51,9 @@ class _ProfileState extends State<Profile> {
       'activityIndex': selectedActivityIndex,
       'goalType': goalType,
       'weight': weightController.text,
+      'height': heightController.text,
+      'age':ageController.text,
+      'sex':sexType,
     });
   }
 
@@ -99,14 +117,40 @@ class _ProfileState extends State<Profile> {
                         GoalWeight(
                           goalType: goalType,
                           weight: weightController.text,
-                          onGoalTypeChanged: (type) {
+                          onGoalTypeChanged: (g) {
                             setState(() {
-                              goalType = type;
+                              goalType = g;
                             });
                           },
                           onWeightChanged: (w) {
                             setState(() {
                               weightController.text = w;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        Height(
+                          height: heightController.text,
+                          onHeightChanged: (h) {
+                            setState(() {
+                              heightController.text = h;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        Age(
+                          age: ageController.text,
+                          onAgeChanged: (a) {
+                            setState(() {
+                              ageController.text = a;
+                            });
+                          },
+                        ),
+                        Sex(
+                          sexType: sexType,
+                          onSexTypeChanged: (s) {
+                            setState(() {
+                              sexType = s;
                             });
                           },
                         ),

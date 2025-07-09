@@ -22,11 +22,19 @@ class _GoalWeightState extends State<GoalWeight> {
   late String goalType;
   late TextEditingController weightController;
 
+  @override
   void initState() {
     super.initState();
     goalType = widget.goalType;
     weightController = TextEditingController(text: widget.weight);
   }
+
+  @override
+  void dispose() {
+    weightController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
