@@ -28,7 +28,6 @@ flutter:
     - lib/presentation/images/vegetable.svg
     - lib/presentation/images/character1.riv
     - lib/presentation/images/character2.riv
-    - lib/presentation/images/character3.riv
     - lib/presentation/images/background.png
     - lib/presentation/images/cat.riv
     - lib/presentation/images/mohu.riv
