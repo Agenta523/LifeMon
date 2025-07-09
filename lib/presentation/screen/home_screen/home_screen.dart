@@ -30,15 +30,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final List<CharacterInfo> characters = [
     CharacterInfo(
-      name: 'ハルオ',
+      name: 'モフィメット',
       description: '元気でやさしい筋トレ好きキャラ',
-      riveFile: 'lib/presentation/images/character3.riv',
+      riveFile: 'lib/presentation/images/mohu.riv',
       iconImage: 'lib/presentation/images/character3_icon.png',
     ),
     CharacterInfo(
-      name: 'ユウコ',
+      name: 'テディキャット',
       description: '冷静で賢い分析キャラ',
-      riveFile: 'lib/presentation/images/character2.riv',
+      riveFile: 'lib/presentation/images/cat.riv',
       iconImage: 'lib/presentation/images/character2_icon.png',
     ),
     CharacterInfo(
@@ -64,28 +64,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Artboard? _artboard;
   RiveAnimationController? _controller;
 
-  double characterX = 100.0;
-  double characterY = 300.0;
+  double? characterX;
+  double? characterY;
   late AnimationController _animationController;
   late Animation<double> _xAnimation;
   late Animation<double> _yAnimation;
   bool isFacingLeft = false;
 
+  final double characterSize = 200.0;
+
   @override
   void initState() {
     super.initState();
-    _loadRive(characters[selectedCharacterIndex].riveFile);
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 初期位置を画面中央に設定
+    if (characterX == null || characterY == null) {
+      final size = MediaQuery.of(context).size;
+      characterX = (size.width / 2) - (characterSize / 2);
+      characterY = (size.height / 2) - (characterSize / 2);
+    }
+    _loadRive(characters[selectedCharacterIndex].riveFile);
+  }
+
   Future<void> _loadRive(String path) async {
     final data = await rootBundle.load(path);
     final file = RiveFile.import(data);
     final artboard = file.mainArtboard;
-    final controller = SimpleAnimation('待機');
+
+    // 前のコントローラーがあれば削除
+    if (_controller != null) {
+      artboard.removeController(_controller!);
+    }
+
+    final controller = SimpleAnimation('state'); // 必ず新しく生成
     artboard.addController(controller);
 
     setState(() {
@@ -97,26 +116,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _moveCharacterTo(Offset target) {
     if (_artboard == null) return;
 
-    final distance = (Offset(characterX, characterY) - target).distance;
+    final distance = (Offset(characterX!, characterY!) - target).distance;
     final duration = Duration(
       milliseconds: (distance * 5).clamp(300, 2000).toInt(),
     );
 
     setState(() {
-      isFacingLeft = target.dx < characterX;
+      isFacingLeft = target.dx < characterX!;
     });
 
     _artboard!.removeController(_controller!);
-    final walk = SimpleAnimation('歩く');
+    final walk = SimpleAnimation('walk');
     _artboard!.addController(walk);
     _controller = walk;
 
     _xAnimation = Tween<double>(
-      begin: characterX,
+      begin: characterX!,
       end: target.dx,
     ).animate(_animationController);
     _yAnimation = Tween<double>(
-      begin: characterY,
+      begin: characterY!,
       end: target.dy,
     ).animate(_animationController);
 
@@ -141,10 +160,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _handleAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      _artboard!.removeController(_controller!);
-      final idle = SimpleAnimation('待機');
+      if (_controller != null && _artboard != null) {
+        _artboard!.removeController(_controller!);
+      }
+      final idle = SimpleAnimation('state'); // 止まらないように新しく生成
       _artboard!.addController(idle);
-      _controller = idle;
+      setState(() {
+        _controller = idle;
+      });
     }
   }
 
@@ -272,7 +295,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          /// 背景
           Positioned.fill(
             child: Image.asset(
               'lib/presentation/images/background.png',
@@ -280,38 +302,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-          /// 全画面タップでキャラ移動
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapDown: (details) {
                 final local = details.localPosition;
-                _moveCharacterTo(Offset(local.dx - 100, local.dy - 100));
+                _moveCharacterTo(
+                  Offset(
+                    local.dx - characterSize / 2,
+                    local.dy - characterSize / 2,
+                  ),
+                );
               },
             ),
           ),
 
-          /// キャラクター
-          Positioned(
-            left: characterX,
-            top: characterY,
-            child: SizedBox(
-              width: 200,
-              height: 200,
-              child:
-                  _artboard != null
-                      ? Transform(
-                        alignment: Alignment.center,
-                        transform:
-                            Matrix4.identity()
-                              ..scale(isFacingLeft ? 1.0 : -1.0, 1.0),
-                        child: Rive(artboard: _artboard!),
-                      )
-                      : const SizedBox(),
+          if (_artboard != null && characterX != null && characterY != null)
+            Positioned(
+              left: characterX!,
+              top: characterY!,
+              child: SizedBox(
+                width: characterSize,
+                height: characterSize,
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform:
+                      Matrix4.identity()..scale(isFacingLeft ? 1.0 : -1.0, 1.0),
+                  child: Rive(artboard: _artboard!),
+                ),
+              ),
             ),
-          ),
 
-          /// キャラ選択ボタン（必ず一番上！）
           Positioned(
             top: 40,
             right: 20,
@@ -326,7 +347,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-          /// ユーザープロフィール
           Positioned(
             top: 40,
             left: 20,
@@ -355,7 +375,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             
           ),
 
-          /// 下部 UI
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
