@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         return Center(
           child: Container(
             width: MediaQuery.of(context).size.width * 0.9,
-            height: 480,
+            height: 500,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -188,52 +188,120 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             child: StatefulBuilder(
               builder: (context, setModalState) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                return Stack(
                   children: [
-                    Text(
-                      characters[tempIndex].name,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          characters[tempIndex].name,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          characters[tempIndex].description,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: PageView.builder(
+                            itemCount: characters.length,
+                            controller: PageController(viewportFraction: 0.8),
+                            onPageChanged: (index) {
+                              setModalState(() => tempIndex = index);
+                            },
+                            itemBuilder: (context, index) {
+                              return Transform.scale(
+                                scale: index == tempIndex ? 1.0 : 0.85,
+                                child: RiveAnimation.asset(
+                                  characters[index].riveFile,
+                                  fit: BoxFit.contain,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedCharacterIndex = tempIndex;
+                            });
+                            _loadRive(characters[tempIndex].riveFile);
+                            Navigator.pop(context);
+                          },
+                          child: const Text("呼ぶ"),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      characters[tempIndex].description,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: PageView.builder(
-                        itemCount: characters.length,
-                        controller: PageController(viewportFraction: 0.8),
-                        onPageChanged: (index) {
-                          setModalState(() => tempIndex = index);
+
+                    // 一覧ボタン（右上に重ねて表示）
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.grid_view_rounded),
+                        onPressed: () {
+                          Navigator.pop(context); // 現在のダイアログを閉じる
+                          _showCharacterGridSelectionDialog(); // グリッド表示に切り替え
                         },
-                        itemBuilder: (context, index) {
-                          return Transform.scale(
-                            scale: index == tempIndex ? 1.0 : 0.85,
-                            child: RiveAnimation.asset(
-                              characters[index].riveFile,
-                              fit: BoxFit.fill,
-                            ),
-                          );
-                        },
                       ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          selectedCharacterIndex = tempIndex;
-                        });
-                        _loadRive(characters[tempIndex].riveFile);
-                        Navigator.pop(context);
-                      },
-                      child: const Text("呼ぶ"),
                     ),
                   ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCharacterGridSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('キャラクター一覧'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: GridView.builder(
+              shrinkWrap: true,
+              itemCount: characters.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedCharacterIndex = index;
+                    });
+                    _loadRive(characters[index].riveFile);
+                    Navigator.pop(context); // グリッドモーダルを閉じる
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: AssetImage(
+                          characters[index].iconImage,
+                        ),
+                        radius: 30,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        characters[index].name,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -248,6 +316,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _animationController.dispose();
     super.dispose();
   }
+
   /// プロフィール関連の変数
   String height = ""; // 身長
   String age = ""; // 年齢
@@ -262,10 +331,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     void _openProfileDialog() async {
       final result = await showModalBottomSheet<Map<String, dynamic>>(
         context: context,
-        isScrollControlled: true, 
+        isScrollControlled: true,
         builder: (context) {
           return FractionallySizedBox(
-            heightFactor:1.0,
+            heightFactor: 1.0,
             child: Profile(
               initialActivityIndex: selectedActivityIndex,
               initialGoalType: goalType,
@@ -288,7 +357,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           weight = result['weight'];
         });
       }
-      debugPrint("✅ initState called: $selectedActivityIndex, $goalType, $weight");
+      debugPrint(
+        "✅ initState called: $selectedActivityIndex, $goalType, $weight",
+      );
     }
 
     return Scaffold(
@@ -350,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Positioned(
             top: 40,
             left: 20,
-            child:GestureDetector(
+            child: GestureDetector(
               onTap: () => _openProfileDialog(),
               child: Row(
                 children: const [
@@ -370,9 +441,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ],
                   ),
                 ],
+              ),
             ),
-            )
-            
           ),
 
           Column(
