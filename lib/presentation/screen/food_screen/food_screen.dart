@@ -56,7 +56,7 @@ class FoodScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
-                      'ここでは今日のあなたの食事を登録できます。\nあなたの食事がモンスターの餌になります！',
+                      'ここでは今日の食事を登録できます。\nあなたの食事がモンスターの餌になります！',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 14),
                     ),
