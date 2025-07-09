@@ -4,7 +4,7 @@ import 'package:life_mon/presentation/screen/home_screen/widget/character_info.d
 class CharacterGridDialog extends StatelessWidget {
   final List<CharacterInfo> characters;
   final Function(int) onCharacterSelected;
-  final VoidCallback onGoBack; // Callback to return to the previous dialog
+  final VoidCallback onGoBack;
 
   const CharacterGridDialog({
     Key? key,
