@@ -74,7 +74,7 @@ class _ProfileState extends State<Profile> {
             children: [
               // ヘッダー
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
                 child: Row(
                   children: [
                     Expanded(

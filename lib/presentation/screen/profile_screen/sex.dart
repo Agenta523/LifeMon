@@ -52,28 +52,28 @@ class _SexState extends State<Sex> {
               const SizedBox(width: 10),
               ChoiceChip(
                 label: const Text("男"),
-                selected: sexType == "男",
+                selected: sexType == "male",
                 selectedColor: const Color(0xff33C5D0),
                 onSelected: (_) {
                   setState(() {
-                  sexType = "男";
+                  sexType = "male";
                   });
                   if (widget.onSexTypeChanged != null) {
-                    widget.onSexTypeChanged!("男");
+                    widget.onSexTypeChanged!("male");
                   }
                 },
               ),
               const SizedBox(width: 10),
               ChoiceChip(
                 label: const Text("女"),
-                selected: sexType == "女",
+                selected: sexType == "female",
                 selectedColor: const Color(0xff33C5D0),
                 onSelected: (_) {
                   setState(() {
-                  sexType = "女";
+                  sexType = "female";
                   });
                   if (widget.onSexTypeChanged != null) {
-                    widget.onSexTypeChanged!("女");
+                    widget.onSexTypeChanged!("female");
                   }
                 },
               ),
