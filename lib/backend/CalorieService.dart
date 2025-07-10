@@ -30,6 +30,7 @@ class calorieService {
         } else {
           throw ArgumentError('不正な性別: $gender');
         }
+        print(activLevel);
 
         // 目標摂取カロリー推定
         double multiplier;
