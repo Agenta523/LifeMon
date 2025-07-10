@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
+import 'energy_repository.dart';
+import 'energy_input_field.dart';
 
 class EnergyInput extends StatefulWidget {
-  final TextEditingController proteinController;
-  final TextEditingController fatController;
-  final TextEditingController carbController;
-
-  const EnergyInput({
-    super.key,
-    required this.proteinController,
-    required this.fatController,
-    required this.carbController,
-  });
+  const EnergyInput({super.key});
 
   @override
   State<EnergyInput> createState() => _EnergyInputState();
@@ -20,48 +13,38 @@ class _EnergyInputState extends State<EnergyInput>
     with SingleTickerProviderStateMixin {
   bool _expanded = false;
 
-  Widget _buildInputField({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: '$label を入力',
-                hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-                border: InputBorder.none,
-              ),
-              style: const TextStyle(color: Colors.black),
-              cursorColor: Colors.black,
-            ),
-          ),
-          const Text(
-            'g',
-            style: TextStyle(
-              color: Color(0xFFF4B400),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+  final _repo = EnergyRepository();
+
+  final _proteinController = TextEditingController();
+  final _fatController = TextEditingController();
+  final _carbController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final data = await _repo.load();
+    setState(() {
+      _proteinController.text = data['protein'] ?? '';
+      _fatController.text = data['fat'] ?? '';
+      _carbController.text = data['carb'] ?? '';
+    });
+  }
+
+  Future<void> _save() async {
+    await _repo.save(
+      protein: _proteinController.text,
+      fat: _fatController.text,
+      carb: _carbController.text,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         GestureDetector(
           onTap: () {
@@ -81,7 +64,6 @@ class _EnergyInputState extends State<EnergyInput>
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
                 ),
               ),
             ),
@@ -96,44 +78,29 @@ class _EnergyInputState extends State<EnergyInput>
                     padding: const EdgeInsets.only(top: 12),
                     child: Column(
                       children: [
-                        _buildInputField(
+                        EnergyInputField(
                           label: 'タンパク質',
-                          controller: widget.proteinController,
+                          controller: _proteinController,
+                          onChanged: _save,
                         ),
-                        _buildInputField(
+                        EnergyInputField(
                           label: '脂質',
-                          controller: widget.fatController,
+                          controller: _fatController,
+                          onChanged: _save,
                         ),
-                        _buildInputField(
+                        EnergyInputField(
                           label: '炭水化物',
-                          controller: widget.carbController,
+                          controller: _carbController,
+                          onChanged: _save,
                         ),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF4B400),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onPressed: () {
-                            final protein = widget.proteinController.text;
-                            final fat = widget.fatController.text;
-                            final carb = widget.carbController.text;
-
-                            print('登録: タンパク質=$protein, 脂質=$fat, 炭水化物=$carb');
-
-                            FocusScope.of(context).unfocus();
+                          onPressed: () async {
+                            await _save();
                             setState(() {
                               _expanded = false;
                             });
                           },
-                          child: const Text(
-                            '登録',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: const Text('登録'),
                         ),
                       ],
                     ),

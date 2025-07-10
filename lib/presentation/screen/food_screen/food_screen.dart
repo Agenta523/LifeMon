@@ -144,11 +144,7 @@ class FoodScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      EnergyInput(
-                        proteinController: _proteinController,
-                        fatController: _fatController,
-                        carbController: _carbController,
-                      ),
+                      EnergyInput(),
                     ],
                   ),
                 ],

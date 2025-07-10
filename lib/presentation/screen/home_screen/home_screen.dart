@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:life_mon/presentation/widget/calorie_bar.dart';
 import 'package:life_mon/presentation/widget/body_icon.dart';
 import 'package:life_mon/presentation/screen/profile_screen/profile_screen.dart';
+import 'package:life_mon/data/UserProfileStorage.dart';
 
 class CharacterInfo {
   final String name;
@@ -260,12 +261,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     //profileを非同期で呼び出し（モーダル表示）
     void _openProfileDialog() async {
+      //データ呼び出し
+      final profile = await UserProfileStorage().loadProfile();
+      if (profile != null) {
+        selectedActivityIndex = profile['activLevel'];
+        goalType = profile['goal'];
+        weight = profile['weight'].toString();
+        height = profile['height'].toString();
+        age = profile['age'].toString();
+        sex = profile['gender'];
+      }
       final result = await showModalBottomSheet<Map<String, dynamic>>(
         context: context,
         isScrollControlled: true, 
         builder: (context) {
           return FractionallySizedBox(
             heightFactor:1.0,
+            //データ参照
             child: Profile(
               initialActivityIndex: selectedActivityIndex,
               initialGoalType: goalType,
@@ -277,18 +289,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           );
         },
       );
-
+      //データ保存
       if (result != null) {
-        setState(() {
-          selectedActivityIndex = result['activityIndex'];
-          goalType = result['goalType'];
-          weight = result['weight'];
-          height = result['height'];
-          age = result['age'];
-          sex = result['sex'];
-        });
+        await UserProfileStorage().saveProfile(
+          weight: double.parse(result['weight']),
+          height: double.parse(result['height']),
+          age: int.parse(result['age']),
+          gender: result['sex'],
+          activLevel: result['activityIndex'],
+          goal: result['goalType'],
+        );
       }
-      debugPrint("✅ initState called: $selectedActivityIndex, $goalType, $weight, $height");
+      debugPrint("✅ initState called: $result");
     }
 
     return Scaffold(
