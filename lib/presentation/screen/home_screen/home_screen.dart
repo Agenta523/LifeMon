@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive/rive.dart';
 
+// --- 正しいimport文 ---
 import 'package:life_mon/presentation/screen/home_screen/widget/character_info.dart';
+import 'package:life_mon/data/UserProfileStorage.dart'; // devブランチから追加
 import 'package:life_mon/presentation/widget/calorie_bar.dart';
 import 'package:life_mon/presentation/widget/body_icon.dart';
 import 'package:life_mon/presentation/screen/profile_screen/profile_screen.dart';
@@ -65,12 +67,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final double characterSize = 200.0;
 
   // Profile State
-  String height = ""; // 身長
-  String age = ""; // 年齢
-  String sex = "男"; // 性別
-  int? selectedActivityIndex; //活動レベル
-  String goalType = "増量"; // 増減量
-  String weight = ""; // 目標体重変化量
+  String height = "";
+  String age = "";
+  String sex = "男";
+  int? selectedActivityIndex;
+  String goalType = "増量";
+  String weight = "";
 
   @override
   void initState() {
@@ -82,6 +84,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           )
           ..addListener(_updateCharacterPosition)
           ..addStatusListener(_handleAnimationStatus);
+
+    // アプリ起動時にプロフィールを読み込む
+    _loadProfileData();
+  }
+
+  // --- プロフィールデータの読み込み専用メソッド ---
+  Future<void> _loadProfileData() async {
+    final profile = await UserProfileStorage().loadProfile();
+    if (profile != null) {
+      setState(() {
+        selectedActivityIndex = profile['activLevel'];
+        goalType = profile['goal'];
+        weight = profile['weight']?.toString() ?? "";
+        height = profile['height']?.toString() ?? "";
+        age = profile['age']?.toString() ?? "";
+        sex = profile['gender'] ?? "男";
+      });
+    }
   }
 
   @override
@@ -211,7 +231,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // --- マージされた _openProfileDialog メソッド ---
   void _openProfileDialog() async {
+    // モーダル表示前に最新のデータを読み込む
+    await _loadProfileData();
+
     final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       isScrollControlled: true,
@@ -230,7 +254,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       },
     );
 
+    // 結果が返ってきたら、データを保存し、UIを更新する
     if (result != null) {
+      // データを永続化
+      await UserProfileStorage().saveProfile(
+        weight: double.tryParse(result['weight'] ?? '0') ?? 0,
+        height: double.tryParse(result['height'] ?? '0') ?? 0,
+        age: int.tryParse(result['age'] ?? '0') ?? 0,
+        gender: result['sex'],
+        activLevel: result['activityIndex'],
+        goal: result['goalType'],
+      );
+
+      // UIを即時反映するためにStateを更新
       setState(() {
         selectedActivityIndex = result['activityIndex'];
         goalType = result['goalType'];
@@ -239,10 +275,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         age = result['age'];
         sex = result['sex'];
       });
+
+      debugPrint("✅ Profile Saved & State Updated: $result");
     }
-    debugPrint(
-      "✅ Profile updated: $selectedActivityIndex, $goalType, $weight, $height",
-    );
   }
 
   // --- Build Method ---
