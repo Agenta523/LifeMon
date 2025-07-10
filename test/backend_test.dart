@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:life_mon/data/UserProfileStorage.dart';
 import 'package:life_mon/backend/CalorieService.dart';
+import 'package:life_mon/backend/PfcService.dart';
 
 void main() {
   // Flutter プラグインをテスト環境で使うための初期化
@@ -21,15 +22,19 @@ void main() {
       height: 170,
       age: 30,
       gender: 'male',   // male, female
-      activLevel: 'II',   // I, II, III
+      activLevel: 'III',   // I, II, III
       goal: 'cut',   // bulk, cut, maintain
     );
 
-    final service = calorieService(storage);
-    await service.ensureInit();
-    final calories = await service.DailyCalorie();
+    final calorie_service = calorieService(storage);
+    await calorie_service.ensureInit();
+    final calories = await calorie_service.DailyCalorie();
+    final pfc_service = PfcService(storage);
+    final target  = await pfc_service.calculatePfcTarget();
 
     print('Test output — Calories: ${calories?.toStringAsFixed(2)}');
+    print('PFC Target - P:${target?.proteinGram}, F:${target?.fatGram}, C:${target?.carboGram}');
+    expect(target, isNotNull);
     expect(calories, isNotNull);
     expect(calories!, closeTo(2219.44, 1));
   });

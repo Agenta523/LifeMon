@@ -18,8 +18,8 @@ class calorieService {
         final height = (profile['height'] as num).toDouble();
         final age = (profile['age'] as num).toDouble();
         final gender = (profile['gender'] as String).toString();
-        final activLevel = (profile['gender'] as String).toString();
-        final goal = (profile['gender'] as String).toString();
+        final activLevel = (profile['activLevel'] as String).toString();
+        final goal = (profile['goal'] as String).toString();
 
         // 基礎代謝推定
         double baseMetabo;
@@ -28,8 +28,9 @@ class calorieService {
         } else if (gender == "female") {
           baseMetabo = (0.0481 * weight + 0.0234 * height - 0.0138 * age - 0.4235) * 1000 / 4.186;
         } else {
-          throw ArgumentError('不正な性別: $gender');
+          throw ArgumentError('不正な性別 from CalorieService: $gender');
         }
+        print(activLevel);
 
         // 目標摂取カロリー推定
         double multiplier;
@@ -40,9 +41,10 @@ class calorieService {
         } else if (activLevel == "III") {
           multiplier = 2.0;
         } else {
-          throw ArgumentError('不正な活動レベル: $activLevel');
+          throw ArgumentError('不正な活動レベル from CalorieService: $activLevel');
         }
 
+        // カロリー調整(仮)
         int adjustment;
         if (goal == "bulk") {
           adjustment = 300;
@@ -51,7 +53,7 @@ class calorieService {
         } else if (goal == "cut") {
           adjustment = -300;
         } else {
-          throw ArgumentError('不正な目標: $goal');
+          throw ArgumentError('不正な目標 from CalorieService: $goal');
         }
 
         return baseMetabo * multiplier + adjustment;
