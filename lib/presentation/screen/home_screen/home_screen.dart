@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive/rive.dart';
 
-// --- 正しいimport文 ---
 import 'package:life_mon/presentation/screen/home_screen/widget/character_info.dart';
-import 'package:life_mon/data/UserProfileStorage.dart'; // devブランチから追加
+import 'package:life_mon/data/UserProfileStorage.dart';
 import 'package:life_mon/presentation/widget/calorie_bar.dart';
 import 'package:life_mon/presentation/widget/body_icon.dart';
 import 'package:life_mon/presentation/screen/profile_screen/profile_screen.dart';
