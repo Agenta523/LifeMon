@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../screen/food_screen/food_screen.dart';
-import '../screen/food_screen/maindish_reg.dart';
 import '../screen/food_screen/dish_catalog_screen.dart';
 
 class FoodNavigator extends StatelessWidget {
@@ -16,10 +15,6 @@ class FoodNavigator extends StatelessWidget {
         switch (settings.name) {
           case '/':
             builder = (context) => const FoodScreen();
-            break;
-
-          case '/maindish':
-            builder = (context) => const MainDishScreen();
             break;
 
           case '/catalog':

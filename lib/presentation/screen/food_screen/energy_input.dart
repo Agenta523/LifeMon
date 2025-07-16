@@ -90,17 +90,17 @@ class _EnergyInputState extends State<EnergyInput>
                         EnergyInputField(
                           label: 'タンパク質',
                           controller: _proteinController,
-                          onChanged: _save,
+                          onChanged: () {},
                         ),
                         EnergyInputField(
                           label: '脂質',
                           controller: _fatController,
-                          onChanged: _save,
+                          onChanged: () {},
                         ),
                         EnergyInputField(
                           label: '炭水化物',
                           controller: _carbController,
-                          onChanged: _save,
+                          onChanged: () {},
                         ),
                         ElevatedButton(
                           onPressed: () async {
