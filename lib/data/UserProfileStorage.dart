@@ -9,7 +9,7 @@ class UserProfileStorage {
     required double height,
     required int age,
     required String gender,
-    required int? activLevel,
+    required String activLevel,
     required String goal,
 
      }) async {
