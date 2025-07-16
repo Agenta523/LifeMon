@@ -13,6 +13,11 @@ class AnalyzeScreen extends StatefulWidget {
 
 class _AnalyzeScreenState extends State<AnalyzeScreen> {
   int selectedIndex = 0;
+  final List calorie = [0,0,0,0,0,0,0];
+  final List carbo=[0,0,0,0,0,0,0];
+  final List fat=[0,0,0,0,0,0,0];
+  final List protein=[0,0,0,0,0,0,0];
+  
 
   Color getLineColor(int index) {
     switch (index) {
@@ -31,14 +36,46 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   List<FlSpot> getLineData(int index) {
     switch (index) {
-      case 0:
-        return [FlSpot(0, 2500), FlSpot(1, 2300), FlSpot(2, 2400),FlSpot(3, 2500), FlSpot(4, 2300), FlSpot(5, 2400),FlSpot(6, 2400)];
-      case 1:
-        return [FlSpot(0, 120), FlSpot(1, 130), FlSpot(2, 110),FlSpot(3, 100), FlSpot(4, 100), FlSpot(5, 120),FlSpot(6, 130)];
-      case 2:
-        return [FlSpot(0, 70), FlSpot(1, 80), FlSpot(2, 75),FlSpot(3, 60), FlSpot(4, 45), FlSpot(5, 50),FlSpot(6, 40)];
-      case 3:
-        return [FlSpot(0, 200), FlSpot(1, 230), FlSpot(2, 310),FlSpot(3, 250), FlSpot(4, 230), FlSpot(5, 240),FlSpot(6, 240)];
+      case 0://カロリー
+        return [
+          FlSpot(0, calorie[0]),
+          FlSpot(1, calorie[1]), 
+          FlSpot(2, calorie[2]),
+          FlSpot(3, calorie[3]), 
+          FlSpot(4, calorie[4]),
+          FlSpot(5, calorie[5]),
+          FlSpot(6, calorie[6])
+        ];
+      case 1://タンパク質
+        return [
+          FlSpot(0, protein[0]), 
+          FlSpot(1, protein[1]), 
+          FlSpot(2, protein[2]),
+          FlSpot(3, protein[3]), 
+          FlSpot(4, protein[4]), 
+          FlSpot(5, protein[5]),
+          FlSpot(6, protein[6])
+        ];
+      case 2://脂質
+        return [
+          FlSpot(0, fat[0]), 
+          FlSpot(1, fat[1]), 
+          FlSpot(2, fat[2]),
+          FlSpot(3, fat[3]), 
+          FlSpot(4, fat[4]), 
+          FlSpot(5, fat[5]),
+          FlSpot(6, fat[6])
+        ];
+      case 3://炭水化物
+        return [
+          FlSpot(0, carbo[0]), 
+          FlSpot(1, carbo[1]), 
+          FlSpot(2, carbo[2]),
+          FlSpot(3, carbo[3]), 
+          FlSpot(4, carbo[4]), 
+          FlSpot(5, carbo[5]),
+          FlSpot(6, carbo[6])
+        ];
       default:
         return [];
     }
@@ -51,13 +88,20 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       return "g";
     }
   }
-  double getMaxYvalue(int index, List<FlSpot> lineData){
-    double? maxY = lineData.isNotEmpty ? lineData.map((spot) => spot.y).reduce((a, b) => a > b ? a : b)
-    : 0;
-    if(index == 0){
-      return maxY + (3 - (maxY % 3 == 0 ? 3 : maxY % 3))*100;
-    }else{
-      return maxY+ (3 - (maxY % 3 == 0 ? 3 : maxY % 3));
+  double getMaxYvalue(int index, List<FlSpot> lineData) {
+    double maxY = lineData.isNotEmpty
+        ? lineData.map((spot) => spot.y).reduce((a, b) => a > b ? a : b)
+        : 0;
+    
+    if (maxY == 0) {
+      // データがすべて0の場合、適切な最小値を設定
+      return index == 0 ? 300 : 3;
+    }
+    
+    if (index == 0) {
+      return maxY + (3 - (maxY % 3 == 0 ? 3 : maxY % 3)) * 100;
+    } else {
+      return maxY + (3 - (maxY % 3 == 0 ? 3 : maxY % 3));
     }
   }
   List<IconData> icons =[Icons.local_fire_department, Icons.fitness_center, Icons.bolt, Icons.school];
@@ -86,9 +130,9 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
             ),
           ),
           Positioned(
-            top: screenHeight * 0.08, // ← 任意の縦位置
+            top: screenHeight * 0.08, 
             left: 0,
-            right: 0, // 横幅を全体に広げることで Center が使える
+            right: 0, 
             child: Center(
               child: Text(
                 labels[selectedIndex],
