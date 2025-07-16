@@ -18,7 +18,7 @@ class calorieService {
         final height = (profile['height'] as num).toDouble();
         final age = (profile['age'] as num).toDouble();
         final gender = (profile['gender'] as String).toString();
-        final activLevel = (profile['activLevel'] as String).toString();
+        final activLevel = profile['activLevel'];
         final goal = (profile['goal'] as String).toString();
 
         // 基礎代謝推定
@@ -34,11 +34,11 @@ class calorieService {
 
         // 目標摂取カロリー推定
         double multiplier;
-        if (activLevel == "I") {
+        if (activLevel == 0) {
           multiplier = 1.5;
-        } else if (activLevel == "II") {
+        } else if (activLevel == 1) {
           multiplier = 1.75;
-        } else if (activLevel == "III") {
+        } else if (activLevel == 2) {
           multiplier = 2.0;
         } else {
           throw ArgumentError('不正な活動レベル from CalorieService: $activLevel');

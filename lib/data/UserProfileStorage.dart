@@ -9,7 +9,7 @@ class UserProfileStorage {
     required double height,
     required int age,
     required String gender,
-    required String activLevel,
+    required int? activLevel,
     required String goal,
 
      }) async {
@@ -19,7 +19,7 @@ class UserProfileStorage {
       'height': height,
       'age': age,
       'gender': gender,   // male, female
-      'activLevel': activLevel,   // I, II, III
+      'activLevel': activLevel,   // 0,1,2
       'goal': goal,   // bulk, cut, maintain
     };
     final jsonStr = jsonEncode(profile);

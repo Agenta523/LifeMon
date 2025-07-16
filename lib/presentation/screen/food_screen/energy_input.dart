@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'energy_repository.dart';
+import 'package:life_mon/data/FoodLogStorage.dart';
 import 'energy_input_field.dart';
 
 class EnergyInput extends StatefulWidget {
@@ -13,7 +13,7 @@ class _EnergyInputState extends State<EnergyInput>
     with SingleTickerProviderStateMixin {
   bool _expanded = false;
 
-  final _repo = EnergyRepository();
+  final _repo = DateValueStorage();
 
   final _proteinController = TextEditingController();
   final _fatController = TextEditingController();
@@ -22,24 +22,33 @@ class _EnergyInputState extends State<EnergyInput>
   @override
   void initState() {
     super.initState();
-    _load();
+    _repo.init().then((_) => _load());
   }
 
   Future<void> _load() async {
-    final data = await _repo.load();
+    final data = await _repo.loadLatest();
     setState(() {
-      _proteinController.text = data['protein'] ?? '';
-      _fatController.text = data['fat'] ?? '';
-      _carbController.text = data['carb'] ?? '';
+      _proteinController.text = data['protein']?.toString() ?? '';
+      _fatController.text = data['fat']?.toString() ?? '';
+      _carbController.text = data['carb']?.toString() ?? '';
     });
   }
 
   Future<void> _save() async {
-    await _repo.save(
-      protein: _proteinController.text,
-      fat: _fatController.text,
-      carb: _carbController.text,
+    final protein = int.tryParse(_proteinController.text) ?? 0;
+    final fat = int.tryParse(_fatController.text) ?? 0;
+    final carb = int.tryParse(_carbController.text) ?? 0;
+
+    await _repo.addData(
+      date: DateTime.now(),
+      protein: protein,
+      fat: fat,
+      carb: carb,
     );
+
+    _proteinController.clear();
+    _fatController.clear();
+    _carbController.clear();
   }
 
   @override
@@ -81,17 +90,17 @@ class _EnergyInputState extends State<EnergyInput>
                         EnergyInputField(
                           label: 'タンパク質',
                           controller: _proteinController,
-                          onChanged: _save,
+                          onChanged: () {},
                         ),
                         EnergyInputField(
                           label: '脂質',
                           controller: _fatController,
-                          onChanged: _save,
+                          onChanged: () {},
                         ),
                         EnergyInputField(
                           label: '炭水化物',
                           controller: _carbController,
-                          onChanged: _save,
+                          onChanged: () {},
                         ),
                         ElevatedButton(
                           onPressed: () async {

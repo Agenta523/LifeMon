@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class Height extends StatefulWidget {
   final String height;
@@ -58,6 +59,9 @@ class _HeightState extends State<Height> {
                     labelText: 'cm',
                   ),
                   keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                   onChanged: (value) {
                     if (widget.onHeightChanged != null) {
                       widget.onHeightChanged!(value);
