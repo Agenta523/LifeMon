@@ -21,7 +21,8 @@ class DateValueStorage {
   }
 
   Future<void> addData(DateTime date, {int protein = 0, int fat = 0, int carbo = 0}) async {
-    final key = date.toIso8601String().split('T')[0]; 
+    // ここで_formatDateKeyを使用
+    final key = _formatDateKey(date);
     final dailyData = _data.putIfAbsent(key, () => {'protein': 0, 'fat': 0, 'carbo': 0});
 
     dailyData['protein'] = (dailyData['protein'] ?? 0) + protein;
@@ -33,8 +34,29 @@ class DateValueStorage {
   }
 
   Map<String, int>? getDataForDate(DateTime date) {
-    final key = date.toIso8601String().split('T')[0];
+    final key = _formatDateKey(date);
     return _data[key];
+  }
+
+  List<List<int>> getWeeklyPFCLists() {
+    List<int> weeklyProteins = [];
+    List<int> weeklyFats = [];
+    List<int> weeklyCarbos = [];
+
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
+
+    for (int i = 6; i >= 0; i--) {
+      final DateTime date = today.subtract(Duration(days: i));
+      final String key = _formatDateKey(date);
+      final Map<String, int>? dailyData = _data[key];
+
+      weeklyProteins.add(dailyData?['protein'] ?? 0);
+      weeklyFats.add(dailyData?['fat'] ?? 0);
+      weeklyCarbos.add(dailyData?['carbo'] ?? 0);
+    }
+
+    return [weeklyProteins, weeklyFats, weeklyCarbos];
   }
 
   void _pruneOldData() {
@@ -42,7 +64,7 @@ class DateValueStorage {
     _data.removeWhere((k, _) {
       try {
         final d = DateTime.parse(k);
-        return now.difference(d).inDays >= 5;
+        return now.difference(d).inDays >= 8;
       } catch (e) {
         return true; 
       }
@@ -52,6 +74,10 @@ class DateValueStorage {
   Future<void> _savePrefs() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, jsonEncode(_data));
+  }
+
+  String _formatDateKey(DateTime date) {
+    return date.toIso8601String().split('T')[0];
   }
 
   Map<String, Map<String, int>> get allData => Map.unmodifiable(_data);
