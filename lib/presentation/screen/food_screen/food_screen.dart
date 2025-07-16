@@ -5,23 +5,60 @@ import 'dish_catalog_screen.dart';
 import 'food_button.dart';
 import 'energy_input.dart';
 
-class FoodScreen extends StatelessWidget {
+class FoodScreen extends StatefulWidget {
   const FoodScreen({super.key});
 
   @override
+  State<FoodScreen> createState() => _FoodScreenState();
+}
+
+class _FoodScreenState extends State<FoodScreen> {
+  final Map<String, List<String>> selectedDishes = {};
+
+  Future<void> _openCatalog(String category) async {
+    final result = await Navigator.push<List<String>>(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => DishCatalogScreen(
+              dishCategory: category,
+              initialSelection: selectedDishes[category] ?? [],
+            ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        selectedDishes[category] = result;
+      });
+    }
+  }
+
+  void _registerMeals() {
+    debugPrint('登録する料理: $selectedDishes');
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('食事を登録しました！')));
+    setState(() {
+      selectedDishes.clear();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final TextEditingController _proteinController = TextEditingController();
-    final TextEditingController _fatController = TextEditingController();
-    final TextEditingController _carbController = TextEditingController();
+    final categories = [
+      {'label': '主菜', 'icon': 'lib/presentation/images/maindish.svg'},
+      {'label': '副菜', 'icon': 'lib/presentation/images/sidedish.svg'},
+      {'label': '汁物', 'icon': 'lib/presentation/images/soup.svg'},
+      {'label': '野菜', 'icon': 'lib/presentation/images/vegetable.svg'},
+      {'label': 'その他', 'icon': 'lib/presentation/images/other.svg'},
+    ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFA8DAB5),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        behavior: HitTestBehavior.opaque,
-        child: SafeArea(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          // ← スクロール可能に
           child: Center(
             child: Container(
               margin: const EdgeInsets.all(16),
@@ -31,7 +68,7 @@ class FoodScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -58,94 +95,45 @@ class FoodScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
-                      'ここでは今日の食事を登録できます。\nあなたの食事がモンスターの餌になります！',
+                      '今日の食事を登録してモンスターを育てよう！',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 14),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Wrap(
-                    alignment: WrapAlignment.center,
                     spacing: 20,
                     runSpacing: 20,
+                    alignment: WrapAlignment.center, // ← 中央揃え追加
                     children: [
-                      FoodButton(
-                        imagePath: 'lib/presentation/images/maindish.svg',
-                        label: "主菜",
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => const DishCatalogScreen(
-                                    dishCategory: '主菜',
-                                  ),
-                            ),
-                          );
-                        },
-                      ),
-                      FoodButton(
-                        imagePath: 'lib/presentation/images/sidedish.svg',
-                        label: "副菜",
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => const DishCatalogScreen(
-                                    dishCategory: '副菜',
-                                  ),
-                            ),
-                          );
-                        },
-                      ),
-                      FoodButton(
-                        imagePath: 'lib/presentation/images/soup.svg',
-                        label: "汁物",
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => const DishCatalogScreen(
-                                    dishCategory: '汁物',
-                                  ),
-                            ),
-                          );
-                        },
-                      ),
-                      FoodButton(
-                        imagePath: 'lib/presentation/images/vegetable.svg',
-                        label: "野菜",
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => const DishCatalogScreen(
-                                    dishCategory: '野菜',
-                                  ),
-                            ),
-                          );
-                        },
-                      ),
-                      FoodButton(
-                        imagePath: 'lib/presentation/images/other.svg',
-                        label: "その他",
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => const DishCatalogScreen(
-                                    dishCategory: 'その他',
-                                  ),
-                            ),
-                          );
-                        },
-                      ),
-                      EnergyInput(),
+                      for (final category in categories)
+                        FoodButton(
+                          imagePath: category['icon']!,
+                          label: category['label']!,
+                          onPressed: () => _openCatalog(category['label']!),
+                        ),
+                      const EnergyInput(),
                     ],
+                  ),
+                  const SizedBox(height: 20),
+                  if (selectedDishes.isNotEmpty)
+                    ...selectedDishes.entries.map((entry) {
+                      return ListTile(
+                        title: Text('${entry.key}: ${entry.value.join(', ')}'),
+                      );
+                    }),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: selectedDishes.isEmpty ? null : _registerMeals,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF4B400),
+                      ),
+                      child: const Text(
+                        'すべて登録する',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ],
               ),

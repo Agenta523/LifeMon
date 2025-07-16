@@ -35,11 +35,20 @@ class _EnergyInputState extends State<EnergyInput>
   }
 
   Future<void> _save() async {
+    DateTime now = DateTime.now();
+    String date =
+        '${now.year}-${now.month}-${now.day}-${now.hour}-${now.minute}';
+
     await _repo.save(
       protein: _proteinController.text,
       fat: _fatController.text,
       carb: _carbController.text,
+      date: date,
     );
+
+    _proteinController.clear();
+    _fatController.clear();
+    _carbController.clear();
   }
 
   @override
@@ -95,6 +104,7 @@ class _EnergyInputState extends State<EnergyInput>
                         ),
                         ElevatedButton(
                           onPressed: () async {
+                            // ✅ 保存処理
                             await _save();
                             setState(() {
                               _expanded = false;
