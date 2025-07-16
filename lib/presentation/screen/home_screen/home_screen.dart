@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:rive/rive.dart';
 import 'package:flutter/services.dart';
+import 'package:rive/rive.dart';
 
+import 'package:life_mon/presentation/screen/home_screen/widget/character_info.dart';
+import 'package:life_mon/data/UserProfileStorage.dart';
 import 'package:life_mon/presentation/widget/calorie_bar.dart';
 import 'package:life_mon/presentation/widget/body_icon.dart';
 import 'package:life_mon/presentation/screen/profile_screen/profile_screen.dart';
-import 'package:life_mon/data/UserProfileStorage.dart';
-
-class CharacterInfo {
-  final String name;
-  final String description;
-  final String riveFile;
-  final String iconImage;
-
-  CharacterInfo({
-    required this.name,
-    required this.description,
-    required this.riveFile,
-    required this.iconImage,
-  });
-}
+import 'package:life_mon/presentation/screen/home_screen/widget/character_display.dart';
+import 'package:life_mon/presentation/screen/home_screen/widget/character_selection_dialog.dart';
+import 'package:life_mon/presentation/screen/home_screen/widget/character_grid_dialog.dart';
+import 'package:life_mon/presentation/screen/home_screen/widget/user_profile_header.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -29,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  // Data
   final List<CharacterInfo> characters = [
     CharacterInfo(
       name: 'モフィメット',
@@ -53,41 +45,68 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final List<IconData> icons = [Icons.fitness_center, Icons.bolt, Icons.school];
   final List<String> labels = ["タンパク質", "脂質", "炭水化物"];
   final List<Color> colors_list = [
-    Color.fromARGB(255, 255, 123, 134),
-    Color.fromARGB(255, 255, 187, 0),
-    Color.fromARGB(255, 123, 134, 255),
+    const Color.fromARGB(255, 255, 123, 134),
+    const Color.fromARGB(255, 255, 187, 0),
+    const Color.fromARGB(255, 123, 134, 255),
   ];
   final List<int> eat_value_base = [90, 60, 250];
   List<int> eat_value = [70, 50, 200];
   int selectedIndex = 0;
 
+  // Character State
   int selectedCharacterIndex = 0;
   Artboard? _artboard;
   RiveAnimationController? _controller;
-
-  double? characterX;
-  double? characterY;
   late AnimationController _animationController;
   late Animation<double> _xAnimation;
   late Animation<double> _yAnimation;
+  double? characterX;
+  double? characterY;
   bool isFacingLeft = false;
-
   final double characterSize = 200.0;
+
+  // Profile State
+  String height = "";
+  String age = "";
+  String sex = "男";
+  int? selectedActivityIndex;
+  String goalType = "増量";
+  String weight = "";
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    );
+    _animationController =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 1500),
+          )
+          ..addListener(_updateCharacterPosition)
+          ..addStatusListener(_handleAnimationStatus);
+
+    // アプリ起動時にプロフィールを読み込む
+    _loadProfileData();
+  }
+
+  // --- プロフィールデータの読み込み専用メソッド ---
+  Future<void> _loadProfileData() async {
+    final profile = await UserProfileStorage().loadProfile();
+    if (profile != null) {
+      setState(() {
+        selectedActivityIndex = profile['activLevel'];
+        goalType = profile['goal'];
+        weight = profile['weight']?.toString() ?? "";
+        height = profile['height']?.toString() ?? "";
+        age = profile['age']?.toString() ?? "";
+        sex = profile['gender'] ?? "男";
+      });
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 初期位置を画面中央に設定
-    if (characterX == null || characterY == null) {
+    if (characterX == null) {
       final size = MediaQuery.of(context).size;
       characterX = (size.width / 2) - (characterSize / 2);
       characterY = (size.height / 2) - (characterSize / 2);
@@ -95,41 +114,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _loadRive(characters[selectedCharacterIndex].riveFile);
   }
 
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  // --- Core Logic Methods ---
+
   Future<void> _loadRive(String path) async {
     final data = await rootBundle.load(path);
     final file = RiveFile.import(data);
     final artboard = file.mainArtboard;
 
-    // 前のコントローラーがあれば削除
     if (_controller != null) {
       artboard.removeController(_controller!);
+      _controller!.dispose();
     }
 
-    final controller = SimpleAnimation('state'); // 必ず新しく生成
-    artboard.addController(controller);
+    final newController = SimpleAnimation('state');
+    artboard.addController(newController);
 
     setState(() {
       _artboard = artboard;
-      _controller = controller;
+      _controller = newController;
     });
   }
 
   void _moveCharacterTo(Offset target) {
     if (_artboard == null) return;
 
-    final distance = (Offset(characterX!, characterY!) - target).distance;
-    final duration = Duration(
-      milliseconds: (distance * 5).clamp(300, 2000).toInt(),
-    );
-
     setState(() {
       isFacingLeft = target.dx < characterX!;
     });
 
-    _artboard!.removeController(_controller!);
-    final walk = SimpleAnimation('walk');
-    _artboard!.addController(walk);
-    _controller = walk;
+    if (_controller != null) {
+      _artboard!.removeController(_controller!);
+    }
+
+    final walkController = SimpleAnimation('walk');
+    _artboard!.addController(walkController);
+    _controller = walkController;
 
     _xAnimation = Tween<double>(
       begin: characterX!,
@@ -139,15 +165,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       begin: characterY!,
       end: target.dy,
     ).animate(_animationController);
-
-    _animationController.stop();
-    _animationController.reset();
-
-    _animationController.removeListener(_updateCharacterPosition);
-    _animationController.removeStatusListener(_handleAnimationStatus);
-
-    _animationController.addListener(_updateCharacterPosition);
-    _animationController.addStatusListener(_handleAnimationStatus);
 
     _animationController.forward(from: 0.0);
   }
@@ -161,148 +178,110 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _handleAnimationStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      if (_controller != null && _artboard != null) {
-        _artboard!.removeController(_controller!);
+      if (_controller != null) {
+        _artboard?.removeController(_controller!);
       }
-      final idle = SimpleAnimation('state'); // 止まらないように新しく生成
-      _artboard!.addController(idle);
-      setState(() {
-        _controller = idle;
-      });
+
+      final idleController = SimpleAnimation('state');
+      _artboard?.addController(idleController);
+      _controller = idleController;
     }
   }
 
-  void _showCharacterSelectionDialog() {
-    int tempIndex = selectedCharacterIndex;
+  void _onCharacterSelected(int index) {
+    if (selectedCharacterIndex == index) return;
+    setState(() {
+      selectedCharacterIndex = index;
+    });
+    _loadRive(characters[index].riveFile);
+  }
 
+  // --- Dialog Methods ---
+  void _showCharacterSelectionDialog() {
     showDialog(
       context: context,
       builder: (context) {
-        return Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: 480,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: StatefulBuilder(
-              builder: (context, setModalState) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      characters[tempIndex].name,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      characters[tempIndex].description,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: PageView.builder(
-                        itemCount: characters.length,
-                        controller: PageController(viewportFraction: 0.8),
-                        onPageChanged: (index) {
-                          setModalState(() => tempIndex = index);
-                        },
-                        itemBuilder: (context, index) {
-                          return Transform.scale(
-                            scale: index == tempIndex ? 1.0 : 0.85,
-                            child: RiveAnimation.asset(
-                              characters[index].riveFile,
-                              fit: BoxFit.fill,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          selectedCharacterIndex = tempIndex;
-                        });
-                        _loadRive(characters[tempIndex].riveFile);
-                        Navigator.pop(context);
-                      },
-                      child: const Text("呼ぶ"),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+        return CharacterSelectionDialog(
+          characters: characters,
+          initialIndex: selectedCharacterIndex,
+          onCharacterSelected: _onCharacterSelected,
+          onSwitchToGrid: () {
+            Navigator.pop(context);
+            _showCharacterGridSelectionDialog();
+          },
         );
       },
     );
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
+  void _showCharacterGridSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CharacterGridDialog(
+          characters: characters,
+          onCharacterSelected: _onCharacterSelected,
+          onGoBack: () {
+            Navigator.pop(context);
+            _showCharacterSelectionDialog();
+          },
+        );
+      },
+    );
   }
-  /// プロフィール関連の変数
-  String height = ""; // 身長
-  String age = ""; // 年齢
-  String sex = "男"; // 0: 男性, 1: 女性
-  int? selectedActivityIndex; //活動レベル
-  String goalType = "増量"; // 増減量
-  String weight = ""; // 目標体重変化量
 
+  // --- マージされた _openProfileDialog メソッド ---
+  void _openProfileDialog() async {
+    // モーダル表示前に最新のデータを読み込む
+    await _loadProfileData();
+
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 1.0,
+          child: Profile(
+            initialActivityIndex: selectedActivityIndex,
+            initialGoalType: goalType,
+            initialWeight: weight,
+            initialHeight: height,
+            initialAge: age,
+            initialSex: sex,
+          ),
+        );
+      },
+    );
+
+    // 結果が返ってきたら、データを保存し、UIを更新する
+    if (result != null) {
+      // データを永続化
+      await UserProfileStorage().saveProfile(
+        weight: double.tryParse(result['weight'] ?? '0') ?? 0,
+        height: double.tryParse(result['height'] ?? '0') ?? 0,
+        age: int.tryParse(result['age'] ?? '0') ?? 0,
+        gender: result['sex'],
+        activLevel: result['activityIndex'],
+        goal: result['goalType'],
+      );
+
+      // UIを即時反映するためにStateを更新
+      setState(() {
+        selectedActivityIndex = result['activityIndex'];
+        goalType = result['goalType'];
+        weight = result['weight'];
+        height = result['height'];
+        age = result['age'];
+        sex = result['sex'];
+      });
+
+      debugPrint("✅ Profile Saved & State Updated: $result");
+    }
+  }
+
+  // --- Build Method ---
   @override
   Widget build(BuildContext context) {
-    //profileを非同期で呼び出し（モーダル表示）
-    void _openProfileDialog() async {
-      //データ呼び出し
-      final profile = await UserProfileStorage().loadProfile();
-      if (profile != null) {
-        selectedActivityIndex = profile['activLevel'];
-        goalType = profile['goal'];
-        weight = profile['weight'].toString();
-        height = profile['height'].toString();
-        age = profile['age'].toString();
-        sex = profile['gender'];
-      }
-      final result = await showModalBottomSheet<Map<String, dynamic>>(
-        context: context,
-        isScrollControlled: true, 
-        builder: (context) {
-          return FractionallySizedBox(
-            heightFactor:1.0,
-            //データ参照
-            child: Profile(
-              initialActivityIndex: selectedActivityIndex,
-              initialGoalType: goalType,
-              initialWeight: weight,
-              initialHeight: height,
-              initialAge: age,
-              initialSex: sex,
-            ),
-          );
-        },
-      );
-      //データ保存
-      if (result != null) {
-        await UserProfileStorage().saveProfile(
-          weight: double.parse(result['weight']),
-          height: double.parse(result['height']),
-          age: int.parse(result['age']),
-          gender: result['sex'],
-          activLevel: result['activityIndex'],
-          goal: result['goalType'],
-        );
-      }
-      debugPrint("✅ initState called: $result");
-    }
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -313,38 +292,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               fit: BoxFit.cover,
             ),
           ),
-
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTapDown: (details) {
-                final local = details.localPosition;
-                _moveCharacterTo(
-                  Offset(
-                    local.dx - characterSize / 2,
-                    local.dy - characterSize / 2,
+              onTapDown:
+                  (details) => _moveCharacterTo(
+                    Offset(
+                      details.localPosition.dx - characterSize / 2,
+                      details.localPosition.dy - characterSize / 2,
+                    ),
                   ),
-                );
-              },
             ),
           ),
-
           if (_artboard != null && characterX != null && characterY != null)
-            Positioned(
-              left: characterX!,
-              top: characterY!,
-              child: SizedBox(
-                width: characterSize,
-                height: characterSize,
-                child: Transform(
-                  alignment: Alignment.center,
-                  transform:
-                      Matrix4.identity()..scale(isFacingLeft ? 1.0 : -1.0, 1.0),
-                  child: Rive(artboard: _artboard!),
-                ),
-              ),
+            CharacterDisplay(
+              artboard: _artboard!,
+              x: characterX!,
+              y: characterY!,
+              size: characterSize,
+              isFacingLeft: isFacingLeft,
             ),
-
+          UserProfileHeader(onTap: _openProfileDialog),
           Positioned(
             top: 40,
             right: 20,
@@ -358,35 +326,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-
-          Positioned(
-            top: 40,
-            left: 20,
-            child:GestureDetector(
-              onTap: () => _openProfileDialog(),
-              child: Row(
-                children: const [
-                  CircleAvatar(backgroundColor: Colors.grey, radius: 24),
-                  SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "ユーザー名",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text("今日も元気に活動中", style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ],
-            ),
-            )
-            
-          ),
-
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -399,11 +338,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 icons_length: icons.length,
                 eat_values: eat_value,
                 eat_values_base: eat_value_base,
-                onSelected: (index) {
-                  setState(() {
-                    selectedIndex = index;
-                  });
-                },
+                onSelected: (index) => setState(() => selectedIndex = index),
               ),
             ],
           ),
