@@ -1,10 +1,10 @@
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DateValueStorage {
   static const _key = 'date_value';
-  final Map<String, int> _data = {};
+
+  final Map<String, Map<String, int>> _data = {};
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -13,16 +13,45 @@ class DateValueStorage {
       final Map<String, dynamic> m = jsonDecode(jsonStr);
       _data
         ..clear()
-        ..addEntries(m.entries.map((e) => MapEntry(e.key, e.value as int)));
+        ..addEntries(
+          m.entries.map(
+            (e) => MapEntry(
+              e.key,
+              Map<String, int>.from(
+                (e.value as Map).map((k, v) => MapEntry(k as String, v as int)),
+              ),
+            ),
+          ),
+        );
       _pruneOldData();
     }
   }
 
-  Future<void> addData(DateTime date, int value) async {
-    final key = date.toIso8601String().split('T')[0];
-    _data[key] = (_data[key] ?? 0) + value;
+  Future<void> addData({
+    required DateTime date,
+    required int protein,
+    required int fat,
+    required int carb,
+  }) async {
+    final key = _dateKey(date);
+
+    final entry = _data[key] ?? {'protein': 0, 'fat': 0, 'carb': 0};
+    entry['protein'] = (entry['protein'] ?? 0) + protein;
+    entry['fat'] = (entry['fat'] ?? 0) + fat;
+    entry['carb'] = (entry['carb'] ?? 0) + carb;
+    _data[key] = entry;
+
     _pruneOldData();
     await _savePrefs();
+  }
+
+  Future<Map<String, int>> loadLatest() async {
+    if (_data.isEmpty) {
+      await init();
+    }
+
+    final todayKey = _dateKey(DateTime.now());
+    return _data[todayKey] ?? {'protein': 0, 'fat': 0, 'carb': 0};
   }
 
   void _pruneOldData() {
@@ -38,5 +67,7 @@ class DateValueStorage {
     await prefs.setString(_key, jsonEncode(_data));
   }
 
-  Map<String, int> get data => Map.unmodifiable(_data);
+  Map<String, Map<String, int>> get data => Map.unmodifiable(_data);
+
+  String _dateKey(DateTime date) => date.toIso8601String().split('T')[0];
 }
