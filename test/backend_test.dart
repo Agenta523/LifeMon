@@ -19,10 +19,10 @@ void main() {
     // テスト用データを保存 (体重, 身長, 年齢, 性別, 活動レベル, 目標)
     await storage.saveProfile(
       weight: 60,
-      height: 170,
-      age: 30,
+      height: 171,
+      age: 20,
       gender: 'male',   // male, female
-      activLevel: 3,   // I, II, III
+      activLevel: 2,   // 0,1,2
       goal: 'cut',   // bulk, cut, maintain
     );
 

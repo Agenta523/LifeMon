@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class Age extends StatefulWidget {
   final String age;
@@ -58,6 +59,9 @@ class _HeightState extends State<Age> {
                     labelText: '歳',
                   ),
                   keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                   onChanged: (value) {
                     if (widget.onAgeChanged != null) {
                       widget.onAgeChanged!(value);

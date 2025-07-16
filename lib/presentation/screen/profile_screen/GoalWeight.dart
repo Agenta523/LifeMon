@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class GoalWeight extends StatefulWidget {
   final String goalType;
@@ -64,6 +65,9 @@ class _GoalWeightState extends State<GoalWeight> {
                     labelText: 'kg',
                   ),
                   keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                   onChanged: (value) {
                     if (widget.onWeightChanged != null) {
                       widget.onWeightChanged!(value);
