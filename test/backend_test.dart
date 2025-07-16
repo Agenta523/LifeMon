@@ -22,7 +22,7 @@ void main() {
       height: 170,
       age: 30,
       gender: 'male',   // male, female
-      activLevel: 'III',   // I, II, III
+      activLevel: 3,   // I, II, III
       goal: 'cut',   // bulk, cut, maintain
     );
 
