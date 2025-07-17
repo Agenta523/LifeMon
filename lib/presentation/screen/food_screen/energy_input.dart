@@ -22,29 +22,17 @@ class _EnergyInputState extends State<EnergyInput>
   @override
   void initState() {
     super.initState();
-    _repo.init().then((_) => _load());
-  }
-
-  Future<void> _load() async {
-    final data = await _repo.loadLatest();
-    setState(() {
-      _proteinController.text = data['protein']?.toString() ?? '';
-      _fatController.text = data['fat']?.toString() ?? '';
-      _carbController.text = data['carb']?.toString() ?? '';
-    });
+    _repo.init(); // 初期化は必要
   }
 
   Future<void> _save() async {
-    final protein = int.tryParse(_proteinController.text) ?? 0;
-    final fat = int.tryParse(_fatController.text) ?? 0;
-    final carb = int.tryParse(_carbController.text) ?? 0;
+    final now = DateTime.now();
 
-    await _repo.addData(
-      date: DateTime.now(),
-      protein: protein,
-      fat: fat,
-      carb: carb,
-    );
+    final int protein = int.tryParse(_proteinController.text) ?? 0;
+    final int fat = int.tryParse(_fatController.text) ?? 0;
+    final int carbo = int.tryParse(_carbController.text) ?? 0;
+
+    await _repo.addData(now, protein: protein, fat: fat, carbo: carbo);
 
     _proteinController.clear();
     _fatController.clear();
