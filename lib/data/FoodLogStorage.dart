@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DateValueStorage {
@@ -21,23 +20,15 @@ class DateValueStorage {
     }
   }
 
-  Future<void> addData(
-    DateTime date, {
-    int protein = 0,
-    int fat = 0,
-    int carbo = 0,
-  }) async {
+  Future<void> addData(DateTime date, {int protein = 0, int fat = 0, int carbo = 0}) async {
     // ここで_formatDateKeyを使用
     final key = _formatDateKey(date);
-    final dailyData = _data.putIfAbsent(
-      key,
-      () => {'protein': 0, 'fat': 0, 'carbo': 0},
-    );
+    final dailyData = _data.putIfAbsent(key, () => {'protein': 0, 'fat': 0, 'carbo': 0});
 
     dailyData['protein'] = (dailyData['protein'] ?? 0) + protein;
     dailyData['fat'] = (dailyData['fat'] ?? 0) + fat;
     dailyData['carbo'] = (dailyData['carbo'] ?? 0) + carbo;
-    debugPrint('保存後データ: $_data');
+    
     _pruneOldData();
     await _savePrefs();
   }
@@ -49,7 +40,7 @@ class DateValueStorage {
     return {
       'protein': daily?['protein'] ?? 0,
       'fat': daily?['fat'] ?? 0,
-      'carbo': daily? ['carbo'] ?? 0,
+      'carbo': daily?['carbo'] ?? 0,
     };
   }
 
@@ -81,7 +72,7 @@ class DateValueStorage {
         final d = DateTime.parse(k);
         return now.difference(d).inDays >= 8;
       } catch (e) {
-        return true;
+        return true; 
       }
     });
   }
