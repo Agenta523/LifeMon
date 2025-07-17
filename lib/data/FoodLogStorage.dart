@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DateValueStorage {
@@ -21,7 +22,6 @@ class DateValueStorage {
   }
 
   Future<void> addData(DateTime date, {int protein = 0, int fat = 0, int carbo = 0}) async {
-    // ここで_formatDateKeyを使用
     final key = _formatDateKey(date);
     final dailyData = _data.putIfAbsent(key, () => {'protein': 0, 'fat': 0, 'carbo': 0});
 
@@ -79,7 +79,6 @@ class DateValueStorage {
 
   Future<void> _savePrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, jsonEncode(_data));
   }
 
   String _formatDateKey(DateTime date) {
