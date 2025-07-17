@@ -1,64 +1,60 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DateValueStorage {
-  static const _key = 'date_value';
-
+  static const _key = 'daily_nutrition_data';
   final Map<String, Map<String, int>> _data = {};
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonStr = prefs.getString(_key);
     if (jsonStr != null) {
-      final Map<String, dynamic> m = jsonDecode(jsonStr);
-      _data
-        ..clear()
-        ..addEntries(
-          m.entries.map(
-            (e) => MapEntry(
-              e.key,
-              Map<String, int>.from(
-                (e.value as Map).map((k, v) => MapEntry(k as String, v as int)),
-              ),
-            ),
-          ),
-        );
+      final Map<String, dynamic> decodedMap = jsonDecode(jsonStr);
+      _data.clear();
+      decodedMap.forEach((key, value) {
+        if (value is Map<String, dynamic>) {
+          _data[key] = value.cast<String, int>();
+        }
+      });
       _pruneOldData();
     }
   }
 
-  Future<void> addData({
-    required DateTime date,
-    required int protein,
-    required int fat,
-    required int carb,
+  Future<void> addData(
+    DateTime date, {
+    int protein = 0,
+    int fat = 0,
+    int carbo = 0,
   }) async {
-    final key = _dateKey(date);
+    final key = date.toIso8601String().split('T')[0];
+    final dailyData = _data.putIfAbsent(
+      key,
+      () => {'protein': 0, 'fat': 0, 'carbo': 0},
+    );
 
-    final entry = _data[key] ?? {'protein': 0, 'fat': 0, 'carb': 0};
-    entry['protein'] = (entry['protein'] ?? 0) + protein;
-    entry['fat'] = (entry['fat'] ?? 0) + fat;
-    entry['carb'] = (entry['carb'] ?? 0) + carb;
-    _data[key] = entry;
-
+    dailyData['protein'] = (dailyData['protein'] ?? 0) + protein;
+    dailyData['fat'] = (dailyData['fat'] ?? 0) + fat;
+    dailyData['carbo'] = (dailyData['carbo'] ?? 0) + carbo;
+    debugPrint('保存後データ: $_data');
     _pruneOldData();
     await _savePrefs();
   }
 
-  Future<Map<String, int>> loadLatest() async {
-    if (_data.isEmpty) {
-      await init();
-    }
-
-    final todayKey = _dateKey(DateTime.now());
-    return _data[todayKey] ?? {'protein': 0, 'fat': 0, 'carb': 0};
+  Map<String, int>? getDataForDate(DateTime date) {
+    final key = date.toIso8601String().split('T')[0];
+    return _data[key];
   }
 
   void _pruneOldData() {
     final now = DateTime.now();
     _data.removeWhere((k, _) {
-      final d = DateTime.parse(k);
-      return now.difference(d).inDays >= 5;
+      try {
+        final d = DateTime.parse(k);
+        return now.difference(d).inDays >= 5;
+      } catch (e) {
+        return true;
+      }
     });
   }
 
@@ -67,7 +63,5 @@ class DateValueStorage {
     await prefs.setString(_key, jsonEncode(_data));
   }
 
-  Map<String, Map<String, int>> get data => Map.unmodifiable(_data);
-
-  String _dateKey(DateTime date) => date.toIso8601String().split('T')[0];
+  Map<String, Map<String, int>> get allData => Map.unmodifiable(_data);
 }

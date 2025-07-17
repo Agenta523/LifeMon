@@ -16,13 +16,13 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   Color getLineColor(int index) {
     switch (index) {
-      case 0:
+      case 0:  // calorie
         return const Color.fromARGB(255, 253, 163, 120);
-      case 1:
+      case 1:  // protein
         return const Color.fromARGB(255, 255, 123, 134);
-      case 2:
+      case 2:  // fat
         return const Color.fromARGB(255, 255, 187, 0);
-      case 3:
+      case 3:  // carbo
         return const Color.fromARGB(255, 123, 134, 255); 
       default:
         return Colors.blue;
