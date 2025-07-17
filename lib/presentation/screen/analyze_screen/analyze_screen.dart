@@ -3,10 +3,12 @@ import 'package:fl_chart/fl_chart.dart';
 import './NutrientSelector.dart';
 import './FLChartData.dart';
 import './zigzagIconPainter.dart';
-import 'package:life_mon/data/FoodLogStorage.dart';
+import 'package:life_mon/data/FoodLogStorage.dart'; // DateValueStorageクラスのパス
 
+/// DateValueStorageのインスタンス。アプリ全体で利用。
 final DateValueStorage _storage = DateValueStorage();
 
+/// 栄養分析画面のウィジェット。
 class AnalyzeScreen extends StatefulWidget {
   const AnalyzeScreen({super.key});
 
@@ -14,22 +16,24 @@ class AnalyzeScreen extends StatefulWidget {
   State<AnalyzeScreen> createState() => _AnalyzeScreenState();
 }
 
+/// AnalyzeScreenのステートを管理するクラス。
 class _AnalyzeScreenState extends State<AnalyzeScreen> {
+  /// 現在選択されている栄養素のインデックス。
   int selectedIndex = 0;
-  List<int> calorie = List.filled(7, 0); // 7つの0で初期化
+  List<int> calorie = List.filled(7, 0);
   List<int> carbo = List.filled(7, 0);
   List<int> fat = List.filled(7, 0);
   List<int> protein = List.filled(7, 0);
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    _loadNutrientData();
+    _loadNutrientData(); // 画面初期化時に栄養素データを読み込む。
   }
-  
+
   /// 週次栄養素データを非同期で読み込み、Stateを更新する。
   Future<void> _loadNutrientData() async {
-    await _storage.init(); // ストレージを初期化（保存されたデータをロード）。
+    await _storage.init(); //ストレージを初期化（保存されたデータをロード）。
 
     // 週ごとのPFCデータリストを取得。
     List<List<int>> pfcListsFromStorage = _storage.getWeeklyPFCLists();
@@ -39,19 +43,20 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       protein = pfcListsFromStorage[0];
       fat = pfcListsFromStorage[1];
       carbo = pfcListsFromStorage[2];
+      //calorie = ;
     });
   }
 
   Color getLineColor(int index) {
     switch (index) {
-      case 0:  // calorie
+      case 0: // カロリーの色
         return const Color.fromARGB(255, 253, 163, 120);
-      case 1:  // protein
+      case 1: // タンパク質の色
         return const Color.fromARGB(255, 255, 123, 134);
-      case 2:  // fat
+      case 2: // 脂質の色
         return const Color.fromARGB(255, 255, 187, 0);
-      case 3:  // carbo
-        return const Color.fromARGB(255, 123, 134, 255); 
+      case 3: // 炭水化物の色
+        return const Color.fromARGB(255, 123, 134, 255);
       default:
         return Colors.blue;
     }
@@ -59,43 +64,51 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   List<FlSpot> getLineData(int index) {
     switch (index) {
-      case 0:
+      case 0: // カロリーのFlSpotデータ
         return List.generate(calorie.length, (i) => FlSpot(i.toDouble(), calorie[i].toDouble()));
-      case 1:
+      case 1: // タンパク質のFlSpotデータ
         return List.generate(protein.length, (i) => FlSpot(i.toDouble(), protein[i].toDouble()));
-      case 2:
+      case 2: // 脂質のFlSpotデータ
         return List.generate(fat.length, (i) => FlSpot(i.toDouble(), fat[i].toDouble()));
-      case 3:
+      case 3: // 炭水化物のFlSpotデータ
         return List.generate(carbo.length, (i) => FlSpot(i.toDouble(), carbo[i].toDouble()));
       default:
         return [];
     }
   }
 
+  /// 選択されたインデックスに基づいて単位文字列を返す
   String getUnit(int index) {
-    if(index == 0){
+    if (index == 0) {
       return "kcal";
-    }else{
+    } else {
       return "g";
     }
   }
+
+  /// グラフのY軸の最大値を計算して返す
   double getMaxYvalue(int index, List<FlSpot> lineData) {
+    // データの最大値を取得、データが空の場合は0
     double maxY = lineData.isNotEmpty
         ? lineData.map((spot) => spot.y).reduce((a, b) => a > b ? a : b)
         : 0;
-    
+
+    // データがすべて0の場合のデフォルト最大値を設定
     if (maxY == 0) {
-      // データがすべて0の場合、適切な最小値を設定
-      return index == 0 ? 300 : 3;
+      return index == 0 ? 300.0 : 30.0;
     }
-    
-    if (index == 0) {
-      return maxY + (3 - (maxY % 3 == 0 ? 3 : maxY % 3)) * 100;
-    } else {
-      return maxY + (3 - (maxY % 3 == 0 ? 3 : maxY % 3));
+
+    // グラフの最大値を切り上げて調整
+    if (index == 0) { 
+      return (maxY / 100).ceil() * 100.0;
+    } else { 
+      return (maxY / 10).ceil() * 10.0;
     }
   }
-  List<IconData> icons =[Icons.local_fire_department, Icons.fitness_center, Icons.bolt, Icons.school];
+
+  /// 栄養素選択ボタンに表示されるアイコンのリスト。
+  List<IconData> icons = [Icons.local_fire_department, Icons.fitness_center, Icons.bolt, Icons.school];
+  /// 栄養素選択ボタンに表示されるラベルのリスト。
   List<String> labels = ["カロリー", "タンパク質", "脂質", "炭水化物"];
 
   @override
@@ -106,7 +119,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     final ellipseHeight = screenHeight * 0.7;
     final ellipseLeft = (screenWidth - ellipseWidth) / 2;
     final ellipseTop = screenHeight * 0.4;
-
     final lineColor = getLineColor(selectedIndex);
     final lineData = getLineData(selectedIndex);
     final unit = getUnit(selectedIndex);
@@ -115,32 +127,35 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          /// 画面全体の背景色。
           Container(
             decoration: BoxDecoration(
-               color: lineColor.withOpacity(0.5)
+              color: lineColor.withOpacity(0.5),
             ),
           ),
+          /// 画面上部の栄養素ラベル表示。
           Positioned(
-            top: screenHeight * 0.08, 
+            top: screenHeight * 0.08,
             left: 0,
-            right: 0, 
+            right: 0,
             child: Center(
               child: Text(
                 labels[selectedIndex],
                 style: TextStyle(
                   fontSize: screenHeight * 0.05,
                   fontWeight: FontWeight.bold,
-                  color:Color.alphaBlend(Colors.black.withOpacity(0.3), lineColor),
+                  color: Color.alphaBlend(Colors.black.withOpacity(0.3), lineColor),
                 ),
               ),
             ),
           ),
+          /// 背景のジグザグアイコンパターン。
           Positioned(
             left: ellipseLeft,
-            child:CustomPaint(
+            child: CustomPaint(
               painter: ZigzagIconPainter(
-                rows:10,
-                columns:6,
+                rows: 10,
+                columns: 6,
                 iconSize: screenHeight * 0.05,
                 spacing: screenHeight * 0.15,
                 icons: icons[selectedIndex],
@@ -148,6 +163,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               ),
             ),
           ),
+          /// 中央下部の白い楕円形背景。
           Positioned(
             left: ellipseLeft,
             top: ellipseTop,
@@ -170,6 +186,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               ),
             ),
           ),
+          /// 栄養素選択ボタン群。
           Positioned(
             top: screenHeight * 0.15,
             left: 0,
@@ -186,6 +203,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               buttonColor: lineColor,
             ),
           ),
+          /// 栄養素グラフデータ表示部分。
           Positioned(
             top: ellipseTop + 80,
             left: -40,
@@ -204,4 +222,3 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     );
   }
 }
-
