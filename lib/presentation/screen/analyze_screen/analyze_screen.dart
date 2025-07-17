@@ -3,6 +3,9 @@ import 'package:fl_chart/fl_chart.dart';
 import './NutrientSelector.dart';
 import './FLChartData.dart';
 import './zigzagIconPainter.dart';
+import 'package:life_mon/data/FoodLogStorage.dart';
+
+final DateValueStorage _storage = DateValueStorage();
 
 class AnalyzeScreen extends StatefulWidget {
   const AnalyzeScreen({super.key});
@@ -13,11 +16,31 @@ class AnalyzeScreen extends StatefulWidget {
 
 class _AnalyzeScreenState extends State<AnalyzeScreen> {
   int selectedIndex = 0;
-  final List calorie = [0,0,0,0,0,0,0];
-  final List carbo=[0,0,0,0,0,0,0];
-  final List fat=[0,0,0,0,0,0,0];
-  final List protein=[0,0,0,0,0,0,0];
+  List<int> calorie = List.filled(7, 0); // 7つの0で初期化
+  List<int> carbo = List.filled(7, 0);
+  List<int> fat = List.filled(7, 0);
+  List<int> protein = List.filled(7, 0);
+
+  @override
+  void initState(){
+    super.initState();
+    _loadNutrientData();
+  }
   
+  /// 週次栄養素データを非同期で読み込み、Stateを更新する。
+  Future<void> _loadNutrientData() async {
+    await _storage.init(); // ストレージを初期化（保存されたデータをロード）。
+
+    // 週ごとのPFCデータリストを取得。
+    List<List<int>> pfcListsFromStorage = _storage.getWeeklyPFCLists();
+
+    setState(() {
+      // 取得したPFCデータを各リストに格納。
+      protein = pfcListsFromStorage[0];
+      fat = pfcListsFromStorage[1];
+      carbo = pfcListsFromStorage[2];
+    });
+  }
 
   Color getLineColor(int index) {
     switch (index) {
@@ -36,46 +59,14 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   List<FlSpot> getLineData(int index) {
     switch (index) {
-      case 0://カロリー
-        return [
-          FlSpot(0, calorie[0]),
-          FlSpot(1, calorie[1]), 
-          FlSpot(2, calorie[2]),
-          FlSpot(3, calorie[3]), 
-          FlSpot(4, calorie[4]),
-          FlSpot(5, calorie[5]),
-          FlSpot(6, calorie[6])
-        ];
-      case 1://タンパク質
-        return [
-          FlSpot(0, protein[0]), 
-          FlSpot(1, protein[1]), 
-          FlSpot(2, protein[2]),
-          FlSpot(3, protein[3]), 
-          FlSpot(4, protein[4]), 
-          FlSpot(5, protein[5]),
-          FlSpot(6, protein[6])
-        ];
-      case 2://脂質
-        return [
-          FlSpot(0, fat[0]), 
-          FlSpot(1, fat[1]), 
-          FlSpot(2, fat[2]),
-          FlSpot(3, fat[3]), 
-          FlSpot(4, fat[4]), 
-          FlSpot(5, fat[5]),
-          FlSpot(6, fat[6])
-        ];
-      case 3://炭水化物
-        return [
-          FlSpot(0, carbo[0]), 
-          FlSpot(1, carbo[1]), 
-          FlSpot(2, carbo[2]),
-          FlSpot(3, carbo[3]), 
-          FlSpot(4, carbo[4]), 
-          FlSpot(5, carbo[5]),
-          FlSpot(6, carbo[6])
-        ];
+      case 0:
+        return List.generate(calorie.length, (i) => FlSpot(i.toDouble(), calorie[i].toDouble()));
+      case 1:
+        return List.generate(protein.length, (i) => FlSpot(i.toDouble(), protein[i].toDouble()));
+      case 2:
+        return List.generate(fat.length, (i) => FlSpot(i.toDouble(), fat[i].toDouble()));
+      case 3:
+        return List.generate(carbo.length, (i) => FlSpot(i.toDouble(), carbo[i].toDouble()));
       default:
         return [];
     }
