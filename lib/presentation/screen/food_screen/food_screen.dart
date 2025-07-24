@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:life_mon/data/Dish_PFC_data.dart';
+import 'package:life_mon/data/FoodLogStorage.dart';
 import 'dish_catalog_screen.dart';
 import 'food_button.dart';
 import 'energy_input.dart';
@@ -34,11 +35,37 @@ class _FoodScreenState extends State<FoodScreen> {
     }
   }
 
-  void _registerMeals() {
+  void _registerMeals() async {
     debugPrint('登録する料理: $selectedDishes');
+
+    int totalProtein = 0;
+    int totalFat = 0;
+    int totalCarbo = 0;
+
+    for (final dishes in selectedDishes.values) {
+      for (final dish in dishes) {
+        final pfc = dishPFCData[dish];
+        if (pfc != null) {
+          totalProtein += pfc['protein'] ?? 0;
+          totalFat += pfc['fat'] ?? 0;
+          totalCarbo += pfc['carbo'] ?? 0;
+        }
+      }
+    }
+
+    final repo = DateValueStorage();
+    await repo.init(); // 念のため初期化
+    await repo.addData(
+      DateTime.now(),
+      protein: totalProtein,
+      fat: totalFat,
+      carbo: totalCarbo,
+    );
+
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('食事を登録しました！')));
+
     setState(() {
       selectedDishes.clear();
     });
