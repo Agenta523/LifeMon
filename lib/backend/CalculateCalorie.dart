@@ -17,6 +17,8 @@ class CalculateCalorie {
     final c = daily['carbo']   ?? 0;
     final calories = p * 4 + f * 9 + c * 4;
 
+    // final day = date.toIso8601String().split('T')[0];
+    // debugPrint('[DailyCalories] $day → $calories kcal');
     return calories;
   }
 }
