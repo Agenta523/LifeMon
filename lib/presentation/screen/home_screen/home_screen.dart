@@ -12,18 +12,20 @@ import 'package:life_mon/presentation/screen/home_screen/widget/character_select
 import 'package:life_mon/presentation/screen/home_screen/widget/character_grid_dialog.dart';
 import 'package:life_mon/presentation/screen/home_screen/widget/user_profile_header.dart';
 import 'package:life_mon/backend/PfcService.dart';
+import 'package:life_mon/data/FoodLogStorage.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Data
   final UserProfileStorage _userProfileStorage = UserProfileStorage();
   late final PfcService _pfcService;
+  final DateValueStorage _foodLogStorage = DateValueStorage();
 
   final List<CharacterInfo> characters = [
     CharacterInfo(
@@ -54,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     const Color.fromARGB(255, 123, 134, 255),
   ];
   List<int> eat_value_base = [0, 0, 0];
-  List<int> eat_value = [70, 50, 200];
+  List<int> eat_value = [0, 0, 0];
   int selectedIndex = 0;
 
   // Character State
@@ -80,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    loadTodaysNutrition();
 
     _pfcService = PfcService(_userProfileStorage);
 
@@ -107,6 +110,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ];
       });
       debugPrint("✅ PFC Target Updated: $eat_value_base");
+    }
+  }
+
+  //今日のPFC摂取量を取得してeat_valueを更新するメソッド
+  Future<void> loadTodaysNutrition() async {
+    await _foodLogStorage.init(); // SharedPreferencesからデータをロード
+    final today = DateTime.now();
+    final todaysData = _foodLogStorage.getDataForDate(today);
+
+    if (mounted && todaysData != null) {
+      setState(() {
+        // labelsの順序「タンパク質, 脂質, 炭水化物」に合わせて更新
+        eat_value = [
+          todaysData['protein'] ?? 0,
+          todaysData['fat'] ?? 0,
+          todaysData['carbo'] ?? 0,
+        ];
+      });
+      debugPrint("✅ Today's Nutrition Loaded: $eat_value");
     }
   }
 
