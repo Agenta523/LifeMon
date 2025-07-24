@@ -44,7 +44,13 @@ class DateValueStorage {
 
   Map<String, int>? getDataForDate(DateTime date) {
     final key = _formatDateKey(date);
-    return _data[key];
+    final daily = _data[key];
+    
+    return {
+      'protein': daily?['protein'] ?? 0,
+      'fat': daily?['fat'] ?? 0,
+      'carbo': daily? ['carbo'] ?? 0,
+    };
   }
 
   List<List<int>> getWeeklyPFCLists() {

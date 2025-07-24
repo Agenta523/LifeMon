@@ -47,10 +47,10 @@ class _FoodScreenState extends State<FoodScreen> {
   @override
   Widget build(BuildContext context) {
     final categories = [
-      {'label': '主菜', 'icon': 'lib/presentation/images/maindish.svg'},
-      {'label': '副菜', 'icon': 'lib/presentation/images/sidedish.svg'},
+      {'label': '主食', 'icon': 'lib/presentation/images/maindish.svg'},
+      {'label': '主菜', 'icon': 'lib/presentation/images/sidedish.svg'},
       {'label': '汁物', 'icon': 'lib/presentation/images/soup.svg'},
-      {'label': '野菜', 'icon': 'lib/presentation/images/vegetable.svg'},
+      {'label': '副菜', 'icon': 'lib/presentation/images/vegetable.svg'},
       {'label': 'その他', 'icon': 'lib/presentation/images/other.svg'},
     ];
 
@@ -58,7 +58,6 @@ class _FoodScreenState extends State<FoodScreen> {
       backgroundColor: const Color(0xFFA8DAB5),
       body: SafeArea(
         child: SingleChildScrollView(
-          // ← スクロール可能に
           child: Center(
             child: Container(
               margin: const EdgeInsets.all(16),
@@ -104,7 +103,7 @@ class _FoodScreenState extends State<FoodScreen> {
                   Wrap(
                     spacing: 20,
                     runSpacing: 20,
-                    alignment: WrapAlignment.center, // ← 中央揃え追加
+                    alignment: WrapAlignment.center,
                     children: [
                       for (final category in categories)
                         FoodButton(
@@ -117,11 +116,19 @@ class _FoodScreenState extends State<FoodScreen> {
                   ),
                   const SizedBox(height: 20),
                   if (selectedDishes.isNotEmpty)
-                    ...selectedDishes.entries.map((entry) {
-                      return ListTile(
-                        title: Text('${entry.key}: ${entry.value.join(', ')}'),
-                      );
-                    }),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children:
+                          selectedDishes.entries.map((entry) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Text(
+                                '${entry.key}: ${entry.value.join(', ')}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            );
+                          }).toList(),
+                    ),
                   const SizedBox(height: 12),
                   Center(
                     child: ElevatedButton(
