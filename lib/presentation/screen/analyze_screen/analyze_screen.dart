@@ -3,7 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import './NutrientSelector.dart';
 import './FLChartData.dart';
 import './zigzagIconPainter.dart';
-import 'package:life_mon/data/FoodLogStorage.dart'; // DateValueStorageクラスのパス
+import 'package:life_mon/data/FoodLogStorage.dart'; 
+import 'dart:async'; // ← Timer を使うためにインポート
 
 /// DateValueStorageのインスタンス。アプリ全体で利用。
 final DateValueStorage _storage = DateValueStorage();
@@ -25,25 +26,45 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   List<int> fat = List.filled(7, 0);
   List<int> protein = List.filled(7, 0);
 
+  Timer? _timer; // ← Timer のインスタンスを保持する変数
+
   @override
   void initState() {
-    super.initState();
-    _loadNutrientData(); // 画面初期化時に栄養素データを読み込む。
+    super.initState(); 
+    // 1秒ごとにデータを更新するタイマーを設定。
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _loadNutrientData();
+    });
   }
 
-  /// 週次栄養素データを非同期で読み込み、Stateを更新する。
-  Future<void> _loadNutrientData() async {
-    await _storage.init(); //ストレージを初期化（保存されたデータをロード）。
+  @override
+  void dispose() {
+    // タイマーをキャンセルしてリソースを解放
+    _timer?.cancel(); 
+    super.dispose();
+  }
 
+  /// 週次栄養素データを非同期で読み込み、Stateを更新する
+  Future<void> _loadNutrientData() async {
+    // ウィジェットがまだマウントされているか確認
+    if (!mounted) { 
+      debugPrint('AnalyzeScreen がマウントされていないため、データロードをスキップしました。');
+      return; 
+    }
+
+    await _storage.init(); // ストレージを初期化（保存されたデータをロード）。
+    
     // 週ごとのPFCデータリストを取得。
     List<List<int>> pfcListsFromStorage = _storage.getWeeklyPFCLists();
+    // 
+    //debugPrint("✅データをロード{$pfcListsFromStorage}"); 
 
     setState(() {
       // 取得したPFCデータを各リストに格納。
       protein = pfcListsFromStorage[0];
       fat = pfcListsFromStorage[1];
       carbo = pfcListsFromStorage[2];
-      //calorie = ;
+      //calorie = ; 
     });
   }
 
