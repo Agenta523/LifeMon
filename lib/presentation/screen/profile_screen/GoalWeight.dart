@@ -78,28 +78,42 @@ class _GoalWeightState extends State<GoalWeight> {
               const SizedBox(width: 10),
               ChoiceChip(
                 label: const Text("増量"),
-                selected: goalType == "増量",
+                selected: goalType == "bulk",
                 selectedColor: const Color(0xff33C5D0),
                 onSelected: (_) {
                   setState(() {
-                    goalType = "増量";
+                    goalType = "bulk";
                   });
                   if (widget.onGoalTypeChanged != null) {
-                    widget.onGoalTypeChanged!("増量");
+                    widget.onGoalTypeChanged!("bulk");
                   }
                 },
               ),
               const SizedBox(width: 10),
               ChoiceChip(
                 label: const Text("減量"),
-                selected: goalType == "減量",
+                selected: goalType == "cut",
                 selectedColor: const Color(0xff33C5D0),
                 onSelected: (_) {
                   setState(() {
-                    goalType = "減量";
+                    goalType = "cut";
                   });
                   if (widget.onGoalTypeChanged != null) {
-                    widget.onGoalTypeChanged!("減量");
+                    widget.onGoalTypeChanged!("cut");
+                  }
+                },
+              ),
+              const SizedBox(width: 10),
+              ChoiceChip(
+                label: const Text("維持"),
+                selected: goalType == "maintain",
+                selectedColor: const Color(0xff33C5D0),
+                onSelected: (_) {
+                  setState(() {
+                    goalType = "maintain";
+                  });
+                  if (widget.onGoalTypeChanged != null) {
+                    widget.onGoalTypeChanged!("maintain");
                   }
                 },
               ),

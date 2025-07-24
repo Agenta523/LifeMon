@@ -1,8 +1,11 @@
+// main.dart
+
 import 'package:flutter/material.dart';
 import 'presentation/navigator/analyze_navigator.dart';
 import 'presentation/navigator/home_navigator.dart';
 import 'presentation/navigator/food_navigator.dart';
 import 'presentation/widget/bottom_navigation.dart';
+import 'presentation/screen/home_screen/home_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -29,11 +32,30 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
 
-  final List<Widget> _screens = const [
-    AnalyzeNavigator(),
-    HomeNavigator(),
-    FoodNavigator(),
-  ];
+  final GlobalKey<HomeScreenState> _homeScreenKey =
+      GlobalKey<HomeScreenState>();
+
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _screens = [
+      const AnalyzeNavigator(),
+      HomeNavigator(homeScreenKey: _homeScreenKey),
+      const FoodNavigator(),
+    ];
+  }
+
+  void _onItemTapped(int index) {
+    if (index == 1 && _currentIndex != 1) {
+      _homeScreenKey.currentState?.loadTodaysNutrition();
+    }
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
-        onItemTapped: (index) => setState(() => _currentIndex = index),
+        onItemTapped: _onItemTapped,
       ),
     );
   }

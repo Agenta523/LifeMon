@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../screen/home_screen/home_screen.dart';
 
 class HomeNavigator extends StatelessWidget {
-  const HomeNavigator({super.key});
+  final GlobalKey<HomeScreenState> homeScreenKey;
+
+  const HomeNavigator({super.key, required this.homeScreenKey});
 
   @override
   Widget build(BuildContext context) {
@@ -12,10 +14,10 @@ class HomeNavigator extends StatelessWidget {
         WidgetBuilder builder;
         switch (settings.name) {
           case '/':
-            builder = (context) => const HomeScreen();
+            builder = (context) => HomeScreen(key: homeScreenKey);
             break;
           default:
-            builder = (context) => const HomeScreen();
+            builder = (context) => HomeScreen(key: homeScreenKey);
         }
         return MaterialPageRoute(builder: builder, settings: settings);
       },
