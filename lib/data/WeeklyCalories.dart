@@ -34,6 +34,6 @@ class WeeklyCalories {
 
     final weeklyTotal = dailyList.reduce((a, b) => a + b);
     debugPrint('[WeeklyCalories] Past 7 days total → $weeklyTotal kcal');
-    return dailyList;
+    return dailyList.reversed.toList();
   }
 }
