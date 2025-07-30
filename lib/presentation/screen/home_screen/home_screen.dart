@@ -13,6 +13,8 @@ import 'package:life_mon/presentation/screen/home_screen/widget/character_grid_d
 import 'package:life_mon/presentation/screen/home_screen/widget/user_profile_header.dart';
 import 'package:life_mon/backend/PfcService.dart';
 import 'package:life_mon/data/FoodLogStorage.dart';
+import 'package:life_mon/backend/CalorieService.dart';
+import 'package:life_mon/backend/CalculateCalorie.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -24,27 +26,29 @@ class HomeScreen extends StatefulWidget {
 class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Data
   final UserProfileStorage _userProfileStorage = UserProfileStorage();
-  late final PfcService _pfcService;
   final DateValueStorage _foodLogStorage = DateValueStorage();
+  late final PfcService _pfcService;
+  late final calorieService _calorieService;
+  late final CalculateCalorie _calculateCalorie;
 
   final List<CharacterInfo> characters = [
     CharacterInfo(
       name: 'モフィメット',
       description: '元気でやさしい筋トレ好きキャラ',
-      riveFile: 'lib/presentation/images/mohu.riv',
-      iconImage: 'lib/presentation/images/character3_icon.png',
+      riveFile: 'lib/presentation/images/mofumetto.riv',
+      iconImage: 'lib/presentation/images/mofumetto.png',
     ),
     CharacterInfo(
       name: 'テディキャット',
       description: '冷静で賢い分析キャラ',
       riveFile: 'lib/presentation/images/cat.riv',
-      iconImage: 'lib/presentation/images/character2_icon.png',
+      iconImage: 'lib/presentation/images/cat.png',
     ),
     CharacterInfo(
       name: 'モフィメット',
       description: '植物と話す自然派キャラ',
-      riveFile: 'lib/presentation/images/character3.riv',
-      iconImage: 'lib/presentation/images/character3_icon.png',
+      riveFile: 'lib/presentation/images/mofumetto.riv',
+      iconImage: 'lib/presentation/images/mofumetto.png',
     ),
   ];
 
@@ -58,6 +62,9 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List<int> eat_value_base = [0, 0, 0];
   List<int> eat_value = [0, 0, 0];
   int selectedIndex = 0;
+
+  int _targetCalories = 0;
+  int _currentCalories = 0;
 
   // Character State
   int selectedCharacterIndex = 0;
@@ -82,9 +89,10 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    loadTodaysNutrition();
-
     _pfcService = PfcService(_userProfileStorage);
+    _calorieService = calorieService(_userProfileStorage); // 追加
+    _calculateCalorie = CalculateCalorie(_foodLogStorage); // 追加
+    _loadAllData();
 
     _animationController =
         AnimationController(
@@ -94,22 +102,36 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ..addListener(_updateCharacterPosition)
           ..addStatusListener(_handleAnimationStatus);
 
-    // アプリ起動時にプロフィールを読み込む
-    _loadProfileData();
+    // アプリ起動時に全データを読み込む
+    _loadAllData();
   }
 
-  //PFC目標値を計算してeat_value_baseを更新するメソッド
-  Future<void> _updatePfcTargets() async {
+  Future<void> _loadAllData() async {
+    await _foodLogStorage.init(); // 食事ログの初期化が最初
+    await _loadProfileData(); // 次にプロフィールと目標値を読み込む
+    await loadTodaysNutrition(); // 最後に今日の摂取量を読み込む
+  }
+
+  // 全目標値を計算
+  Future<void> _updateAllTargets() async {
+    // 目標PFCを計算
     final pfcTarget = await _pfcService.calculatePfcTarget();
-    if (pfcTarget != null && mounted) {
+    // 目標カロリーを計算
+    final calorieTarget = await _calorieService.DailyCalorie();
+
+    if (mounted) {
       setState(() {
-        eat_value_base = [
-          pfcTarget.proteinGram.round(), // タンパク質
-          pfcTarget.fatGram.round(), // 脂質
-          pfcTarget.carboGram.round(), // 炭水化物
-        ];
+        if (pfcTarget != null) {
+          eat_value_base = [
+            pfcTarget.proteinGram.round(),
+            pfcTarget.fatGram.round(),
+            pfcTarget.carboGram.round(),
+          ];
+        }
+        _targetCalories = calorieTarget?.round() ?? 0;
       });
       debugPrint("✅ PFC Target Updated: $eat_value_base");
+      debugPrint("✅ Calorie Target Updated: $_targetCalories kcal");
     }
   }
 
@@ -118,15 +140,24 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     await _foodLogStorage.init(); // SharedPreferencesからデータをロード
     final today = DateTime.now();
     final todaysData = _foodLogStorage.getDataForDate(today);
+    final calorieTarget = await _calorieService.DailyCalorie();
+    _targetCalories = calorieTarget?.round() ?? 0;
+    _currentCalories = _calculateCalorie.caloriesOn(today);
 
     if (mounted && todaysData != null) {
       setState(() {
         // labelsの順序「タンパク質, 脂質, 炭水化物」に合わせて更新
-        eat_value = [
-          todaysData['protein'] ?? 0,
-          todaysData['fat'] ?? 0,
-          todaysData['carbo'] ?? 0,
-        ];
+        if (todaysData != null) {
+          eat_value = [
+            todaysData['protein'] ?? 0,
+            todaysData['fat'] ?? 0,
+            todaysData['carbo'] ?? 0,
+          ];
+        } else {
+          eat_value = [0, 0, 0];
+        }
+        // 今日の摂取カロリーを計算
+        _currentCalories = _calculateCalorie.caloriesOn(today);
       });
       debugPrint("✅ Today's Nutrition Loaded: $eat_value");
     }
@@ -146,7 +177,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
 
       //プロフィール読み込み後にPFCを計算・更新
-      await _updatePfcTargets();
+      await _updateAllTargets();
     }
   }
 
@@ -323,7 +354,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       });
 
       //プロフィール更新後にPFCを再計算・更新
-      await _updatePfcTargets();
+      await _updateAllTargets();
 
       debugPrint("✅ Profile Saved & State Updated: $result");
     }
@@ -379,7 +410,10 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const CalorieBar(),
+              CalorieBar(
+                calorieValue: _currentCalories,
+                calorieTarget: _targetCalories,
+              ),
               BodyIcons(
                 icons: icons,
                 labels: labels,
