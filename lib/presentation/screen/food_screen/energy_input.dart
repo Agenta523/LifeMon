@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:life_mon/data/FoodLogStorage.dart';
+import 'package:life_mon/backend/CalculateCalorie.dart';
+import 'package:life_mon/data/WeeklyCalories.dart';
 import 'energy_input_field.dart';
 
 class EnergyInput extends StatefulWidget {
@@ -19,10 +21,13 @@ class _EnergyInputState extends State<EnergyInput>
   final _fatController = TextEditingController();
   final _carbController = TextEditingController();
 
+  late final CalculateCalorie _calculator;
+
   @override
   void initState() {
     super.initState();
     _repo.init(); // 初期化は必要
+    _calculator = CalculateCalorie(_repo);
   }
 
   Future<void> _save() async {
@@ -33,6 +38,11 @@ class _EnergyInputState extends State<EnergyInput>
     final int carbo = int.tryParse(_carbController.text) ?? 0;
 
     await _repo.addData(now, protein: protein, fat: fat, carbo: carbo);
+    final cals = _calculator.caloriesOn(now);
+    debugPrint('[DailyCalories] ${now.toIso8601String().split("T")[0]} → $cals kcal');
+    final weekly = WeeklyCalories(_repo);
+    final list   = await weekly.saveLast7DaysAndReturnList();
+    debugPrint('[WeeklyCalories] Daily list → $list');
 
     _proteinController.clear();
     _fatController.clear();

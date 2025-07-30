@@ -57,7 +57,7 @@ class _GoalWeightState extends State<GoalWeight> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: screenWidth * 0.3,
+                width: screenWidth * 0.25,
                 child: TextField(
                   controller: weightController,
                   decoration: const InputDecoration(

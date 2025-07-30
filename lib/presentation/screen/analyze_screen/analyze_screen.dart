@@ -4,7 +4,8 @@ import './NutrientSelector.dart';
 import './FLChartData.dart';
 import './zigzagIconPainter.dart';
 import 'package:life_mon/data/FoodLogStorage.dart'; 
-import 'dart:async'; // ← Timer を使うためにインポート
+import 'dart:async'; 
+import 'package:life_mon/data/WeeklyCalories.dart';
 
 /// DateValueStorageのインスタンス。アプリ全体で利用。
 final DateValueStorage _storage = DateValueStorage();
@@ -56,7 +57,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     
     // 週ごとのPFCデータリストを取得。
     List<List<int>> pfcListsFromStorage = _storage.getWeeklyPFCLists();
-    // 
+    List<int> calorieListsFromStorage = await WeeklyCalories(_storage).saveLast7DaysAndReturnList();
     //debugPrint("✅データをロード{$pfcListsFromStorage}"); 
 
     setState(() {
@@ -64,7 +65,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       protein = pfcListsFromStorage[0];
       fat = pfcListsFromStorage[1];
       carbo = pfcListsFromStorage[2];
-      //calorie = ; 
+      calorie =  calorieListsFromStorage;
     });
   }
 
