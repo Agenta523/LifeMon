@@ -17,14 +17,14 @@ import 'package:life_mon/backend/CalorieService.dart';
 import 'package:life_mon/backend/CalculateCalorie.dart';
 import 'package:life_mon/backend/BmiService.dart';
 
+enum BmiStatus { underweight, normal, overweight }
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => HomeScreenState();
 }
-
-enum BmiStatus { underweight, normal, overweight }
 
 class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Data
@@ -34,6 +34,9 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late final calorieService _calorieService;
   late final CalculateCalorie _calculateCalorie;
   late final bmiService _bmiService;
+
+  BmiStatus _bmiStatus = BmiStatus.normal;
+  bool _isWalking = false;
 
   final List<CharacterInfo> characters = [
     CharacterInfo(
@@ -90,9 +93,6 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String goalType = "増量";
   String weight = "";
 
-  BmiStatus _bmiStatus = BmiStatus.normal; // BMI状態を保持
-  bool _isWalking = false;
-
   @override
   void initState() {
     super.initState();
@@ -116,23 +116,19 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _loadAllData() async {
     await _foodLogStorage.init(); // 食事ログの初期化が最初
-    await _loadProfileData(); // 次にプロフィールと目標値を読み込む
-    await loadTodaysNutrition(); // 最後に今日の摂取量を読み込む
-    await _updateBmiStatus();
+    await _loadProfileData(); // プロフィールと目標値を読み込む
+    await loadTodaysNutrition(); // 今日の摂取量を読み込む
   }
 
-  Future<void> _updateBmiStatus() async {
+  Future<void> _reloadBMI() async {
     final bmi = await _bmiService.UserBmi();
-    if (bmi != null && mounted) {
-      setState(() {
-        if (bmi < 18.5) {
-          _bmiStatus = BmiStatus.underweight;
-        } else if (bmi < 25) {
-          _bmiStatus = BmiStatus.normal;
-        } else {
-          _bmiStatus = BmiStatus.overweight;
-        }
-      });
+    if (bmi != null) {
+      if (bmi < 18.5)
+        _bmiStatus = BmiStatus.underweight;
+      else if (bmi < 25)
+        _bmiStatus = BmiStatus.normal;
+      else
+        _bmiStatus = BmiStatus.overweight;
     }
   }
 
@@ -154,6 +150,8 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
         _targetCalories = calorieTarget?.round() ?? 0;
       });
+      await _reloadBMI();
+      await _loadRive(characters[selectedCharacterIndex].riveFile);
       debugPrint("✅ PFC Target Updated: $eat_value_base");
       debugPrint("✅ Calorie Target Updated: $_targetCalories kcal");
     }
@@ -183,6 +181,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // 今日の摂取カロリーを計算
         _currentCalories = _calculateCalorie.caloriesOn(today);
       });
+      await _reloadBMI();
       debugPrint("✅ Today's Nutrition Loaded: $eat_value");
     }
   }
@@ -224,27 +223,17 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   // --- Core Logic Methods ---
-  // 条件に応じたアニメーションの取得
-  String _getAnimationName() {
-    final calorieRatio =
-        (_targetCalories > 0) ? (_currentCalories / _targetCalories * 100) : 0;
 
-    // 感情の状態を決定
-    String emotionState = '';
-    switch (_bmiStatus) {
-      case BmiStatus.normal:
-        if (calorieRatio >= 80 && calorieRatio < 110)
-          emotionState = 'happy';
-        else if (calorieRatio < 60 || calorieRatio >= 130)
-          emotionState = 'bad';
-        break;
-      case BmiStatus.overweight:
-      case BmiStatus.underweight:
-        if (calorieRatio < 80 || calorieRatio >= 110) emotionState = 'bad';
-        break;
+  Future<void> _loadRive(String path) async {
+    final data = await rootBundle.load(path);
+    final file = RiveFile.import(data);
+    final artboard = file.mainArtboard;
+
+    if (_controller != null) {
+      artboard.removeController(_controller!);
+      _controller!.dispose();
     }
 
-    // 体型のプレフィックスを決定
     String bodyTypePrefix = '';
     switch (_bmiStatus) {
       case BmiStatus.underweight:
@@ -254,68 +243,47 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         bodyTypePrefix = 'big';
         break;
       case BmiStatus.normal:
+        bodyTypePrefix = 'state';
         break;
     }
 
-    // 最終的なアニメーション名を組み立て
-    if (emotionState.isNotEmpty) {
-      if (emotionState == 'happy') return 'happy';
-      return bodyTypePrefix.isEmpty ? 'bad' : '$bodyTypePrefix bad';
-    }
-    if (_isWalking) {
-      return bodyTypePrefix.isEmpty ? 'walk' : '$bodyTypePrefix walk';
-    }
-    return bodyTypePrefix.isEmpty ? 'state' : bodyTypePrefix;
-  }
+    final newController = SimpleAnimation(bodyTypePrefix);
+    artboard.addController(newController);
 
-  //アニメーションの制御
-  void _updateCharacterAnimation() {
-    if (_artboard == null) return;
-    final animationName = _getAnimationName();
-
-    if (_controller != null) {
-      _artboard!.removeController(_controller!);
-      _controller!.dispose();
-    }
-    final newController = SimpleAnimation(animationName, autoplay: true);
-    _artboard!.addController(newController);
-    _controller = newController;
-    debugPrint("🎬 Animation Updated: $animationName");
-  }
-
-  Future<void> _loadRive(String path) async {
-    try {
-      final data = await rootBundle.load(path);
-      final file = RiveFile.import(data);
-      final artboard = file.mainArtboard;
-      if (mounted) {
-        setState(() {
-          _artboard = artboard;
-        });
-        // Riveファイル読み込み完了後に、現在の状態に基づいた初期アニメーションを再生
-        _updateCharacterAnimation();
-      }
-    } catch (e) {
-      debugPrint("Error loading Rive file: $e");
-    }
+    setState(() {
+      _artboard = artboard;
+      _controller = newController;
+    });
   }
 
   void _moveCharacterTo(Offset target) {
     if (_artboard == null) return;
 
-    if (mounted) {
-      setState(() {
-        // キャラクターの向きを更新
-        isFacingLeft = target.dx < characterX!;
-        // 歩行状態フラグを立てる
-        _isWalking = true;
-      });
+    setState(() {
+      isFacingLeft = target.dx < characterX!;
+    });
+
+    if (_controller != null) {
+      _artboard!.removeController(_controller!);
     }
 
-    // 歩きアニメーションに更新
-    _updateCharacterAnimation();
+    String bodyTypePrefix = '';
+    switch (_bmiStatus) {
+      case BmiStatus.underweight:
+        bodyTypePrefix = 'cut walk';
+        break;
+      case BmiStatus.overweight:
+        bodyTypePrefix = 'big walk';
+        break;
+      case BmiStatus.normal:
+        bodyTypePrefix = 'walk';
+        break;
+    }
 
-    // 移動アニメーションの開始
+    final walkController = SimpleAnimation(bodyTypePrefix);
+    _artboard!.addController(walkController);
+    _controller = walkController;
+
     _xAnimation = Tween<double>(
       begin: characterX!,
       end: target.dx,
@@ -324,6 +292,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       begin: characterY!,
       end: target.dy,
     ).animate(_animationController);
+
     _animationController.forward(from: 0.0);
   }
 
@@ -335,16 +304,27 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _handleAnimationStatus(AnimationStatus status) {
-    // アニメーションが完了したら
     if (status == AnimationStatus.completed) {
-      if (mounted) {
-        setState(() {
-          // 歩行状態フラグを解除
-          _isWalking = false;
-        });
+      if (_controller != null) {
+        _artboard?.removeController(_controller!);
       }
-      // 待機アニメーションに更新
-      _updateCharacterAnimation();
+
+      String bodyTypePrefix = '';
+      switch (_bmiStatus) {
+        case BmiStatus.underweight:
+          bodyTypePrefix = 'cut';
+          break;
+        case BmiStatus.overweight:
+          bodyTypePrefix = 'big';
+          break;
+        case BmiStatus.normal:
+          bodyTypePrefix = 'state';
+          break;
+      }
+
+      final idleController = SimpleAnimation(bodyTypePrefix);
+      _artboard?.addController(idleController);
+      _controller = idleController;
     }
   }
 
